@@ -14,6 +14,8 @@ window.HKBL_CONFIG = {
   //     "chauffeur" : lien ouvert, saisie des bons seulement (aucun historique)
   //     "direction" : lien privé, connexion obligatoire, registre complet
   profil: "chauffeur",
+  retourUrl: "",                                    // lien « retour » vers l'app qui héberge celle-ci
+
 
   // --- Base de données Supabase : même projet que la feuille d'heures ---
   supabaseUrl: "https://voxtcptopwnautnxsmia.supabase.co",
@@ -22,8 +24,8 @@ window.HKBL_CONFIG = {
 
   // --- Envoi automatique au chef de chantier : scénario Make « HK - BL signé » ---
   //     Vide = pas encore branché : le PDF se partage depuis l'app (bouton Partager).
-  makeWebhookUrl: "",
-  makeJeton: "",                                  // mot de passe du scénario Make (filtre)
+  makeWebhookUrl: "https://hook.eu1.make.com/gkarrpm6pxrfk6iloylfesadrgm62avl",
+  makeJeton: "HK-BL-Z8856-HQKLP-R97G2",                                  // mot de passe du scénario Make (filtre)
   copieBureau: "",                              // ex. "contact@hkterrassement.fr"
 
   // --- En-tête et mentions du PDF ---
@@ -297,6 +299,7 @@ body.is-wizard .toasts{bottom:calc(var(--bar-h) + 18px + env(safe-area-inset-bot
 .hero > div,.page-h > div:first-child{flex:1 1 320px}
 .hero .display,.page-h .display{margin-top:6px}
 .hero-cta{flex:none}
+.nav-retour{color:var(--muted)!important}
 .mini-row{display:flex;align-items:center;gap:6px}
 .mini-row .mini{flex:1;min-width:0}
 .hero-note{display:inline-flex;align-items:center;gap:7px;margin-top:12px;padding:7px 12px;border-radius:999px;background:var(--accent-soft);color:var(--accent-ink);font-size:13px;font-weight:700}
@@ -910,6 +913,7 @@ const state = { config: null, bl: null, bons: null, day: null, weekStart: null, 
    des chauffeurs, sans rien changer aux réglages.                            */
 const PROFIL = new URLSearchParams(location.search).get('profil') || window.HKBL_CONFIG?.profil || 'direction';
 const CHAUFFEUR = PROFIL === 'chauffeur';
+const RETOUR = window.HKBL_CONFIG?.retourUrl || '';   // app qui héberge celle-ci (accueil Direction)
 const DIRECTION = !CHAUFFEUR;
 
 /* Brouillons gardés sur l'appareil : c'est la seule mémoire de l'app
@@ -1509,7 +1513,7 @@ function statusBadge(b) {
 }
 function mailLabel(mail) {
   if (!mail) return 'Pas encore envoyé';
-  return { envoye: `Envoyé à ${mail.to}`, local: `Préparé pour ${mail.to} (mode local)`, 'sans-email': 'Aucun email de chef de chantier', attente: `Envoi automatique pas encore branché : partagez le PDF à ${mail.to}`, erreur: `Erreur : ${mail.message || 'envoi impossible'}` }[mail.statut] || mail.statut;
+  return { envoye: `Envoyé à ${mail.to}`, local: `Préparé pour ${mail.to} (mode local)`, 'sans-email': 'Aucun email de chef de chantier', attente: `Envoi automatique pas encore actif : partagez le PDF à ${mail.to}`, erreur: `L'envoi n'a pas abouti : réessayez ou partagez le PDF depuis l'écran de fin` }[mail.statut] || mail.statut;
 }
 
 </script>
@@ -1582,7 +1586,7 @@ const SB = {
     } catch { setOnline(false); throw new Error('Pas de réseau pour le moment'); }
     setOnline(true);
     if (r.status === 401 && !ANON && !rejoue && await SB.renouveler()) return SB.req(url, opt, true);
-    if (r.status === 401 && ANON) throw new Error('Accès refusé par la base : le script « 32-bons-location.sql » n\'est pas encore passé.');
+    if (r.status === 401 && ANON) { console.warn('[HK] 401 : politiques SQL du script 32 absentes ou incomplètes'); throw new Error('Le service est indisponible pour le moment. Prévenez le bureau.'); }
     if (r.status === 401) { Session.effacer(); setTimeout(() => viewLogin('Session expirée : reconnectez-vous.'), 0); throw new Error('Session expirée'); }
     if (!r.ok) {
       let msg = `Erreur ${r.status}`;
@@ -1601,6 +1605,11 @@ const SB = {
   rpc: (fn, args) => SB.rest(`rpc/${fn}`, { method: 'POST', body: args }),
 };
 
+/* Connexion automatique de l'app du bureau (profil direction) : le compte est
+   dans la page, personne ne tape rien. Si elle échoue, l'écran de connexion
+   habituel prend le relais. Ce compte n'existe pas dans l'app des chauffeurs. */
+const AUTO = (!CHAUFFEUR && CFG.compteBureau?.identifiant) ? CFG.compteBureau : null;
+
 async function connexion(identifiant, motDePasse, garder) {
   const j = await SB.jeton('password', { email: identifiant.trim().toLowerCase() + (CFG.domaine || '@hk.local'), password: motDePasse });
   if (!j?.access_token) throw new Error('Identifiant ou mot de passe incorrect.');
@@ -1612,6 +1621,22 @@ async function connexion(identifiant, motDePasse, garder) {
   const prefs = LS.get(CLE('prefs'), {});
   if (!prefs.conducteur) LS.set(CLE('prefs'), { ...prefs, conducteur: moi[0].nom });
 }
+// L'ouverture automatique a échoué : message neutre à l'écran, détail en console (côté agence).
+const messageAuto = () => {
+  if (!AUTO) return '';
+  console.warn(`[HK] ouverture automatique impossible : le compte « ${AUTO.identifiant} » n'existe pas encore (voir MISE-EN-LIGNE.txt).`);
+  return 'Ouverture automatique indisponible. Connectez-vous avec votre compte HK.';
+};
+
+let autoEnCours = null;
+async function connexionAuto() {
+  if (!AUTO || MODE !== 'supabase') return false;
+  if (Session.employe) return true;
+  if (!autoEnCours) autoEnCours = connexion(AUTO.identifiant, AUTO.motDePasse, true)
+    .then(() => true).catch(() => false).finally(() => { autoEnCours = null; });
+  return autoEnCours;
+}
+
 function deconnexion() {
   Session.effacer();
   Object.assign(state, { bl: null, bons: null, agenda: null, config: null, sig: null });
@@ -1640,6 +1665,7 @@ function viewLogin(message = '') {
         <p class="err-msg" id="lg-err"${message ? '' : ' hidden'}>${icon('alert')}<span>${esc(message)}</span></p>
         <button class="btn btn-accent btn-lg btn-block" type="submit" id="lg-ok">Se connecter</button>
       </form>
+      ${RETOUR ? `<p style="margin-top:18px"><a class="link" href="${RETOUR}">${icon('arrowL')}Retour à l'espace Direction</a></p>` : ''}
     </section>`;
   const form = $('#login-form'), err = $('#lg-err'), btn = $('#lg-ok');
   setTimeout(() => $(dernier ? '#lg-mdp' : '#lg-id')?.focus(), 80);
@@ -1735,8 +1761,9 @@ async function envoyerAuChef(id, bl, chemin, destinataire, pdfBase64) {
       const r = await fetch(CFG.makeWebhookUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ jeton: CFG.makeJeton || '', to: destinataire, cc: CFG.copieBureau || '', subject, html,
           pdfName: `BL-${bl.numero}.pdf`, pdfBase64, bon: ligneSheets(bl, chemin) }) });
-      mail = r.ok ? { statut: 'envoye', mode: 'make', to: destinataire, subject, le } : { statut: 'erreur', to: destinataire, le, message: `Make a répondu ${r.status}` };
-    } catch (e) { mail = { statut: 'erreur', to: destinataire, le, message: e.message }; }
+      if (!r.ok) console.warn(`[HK] webhook d'envoi : réponse ${r.status}`);
+      mail = r.ok ? { statut: 'envoye', mode: 'auto', to: destinataire, subject, le } : { statut: 'erreur', to: destinataire, le };
+    } catch (e) { console.warn('[HK] webhook d\'envoi injoignable :', e.message); mail = { statut: 'erreur', to: destinataire, le }; }
   }
   if (ANON) await SB.rpc('bl_terrain_mail', { p_id: id, p_mail: mail, p_envoye: mail.statut === 'envoye' });
   else await SB.rest(`bons_location?id=eq.${id}`, { method: 'PATCH', prefer: 'return=minimal', body: { mail, statut: mail.statut === 'envoye' ? 'envoye' : 'signe' } });
@@ -2113,9 +2140,11 @@ const NAV = CHAUFFEUR
 
 function renderNav(active) {
   const cur = id => (id === active ? ' aria-current="page"' : '');
-  $('#topnav').innerHTML = NAV.map(n => `<a href="${n.href}"${cur(n.id)}>${icon(n.ic)}${n.label}</a>`).join('') +
+  const retour = RETOUR ? `<a class="nav-retour" href="${RETOUR}">${icon('arrowL')}Direction</a>` : '';
+  $('#topnav').innerHTML = retour + NAV.map(n => `<a href="${n.href}"${cur(n.id)}>${icon(n.ic)}${n.label}</a>`).join('') +
     `<a class="nav-new" href="#/nouveau">${icon('plus')}Nouveau bon</a>`;
   $('#tabbar').innerHTML = [
+    ...(RETOUR ? [`<a href="${RETOUR}">${icon('arrowL')}Direction</a>`] : []),
     ...NAV.map(n => `<a href="${n.href}"${cur(n.id)}>${icon(n.ic)}${n.label}</a>`),
     `<a class="tab-new" href="#/nouveau"><span class="plus">${icon('plus')}</span>Nouveau</a>`,
   ].join('');
@@ -2261,7 +2290,7 @@ async function loadHome() {
     const recent = state.bons.filter(b => b.statut !== 'brouillon').sort((a, b) => (b.signeLe || '').localeCompare(a.signeLe || '')).slice(0, 5);
     $('#recent').innerHTML = recent.length ? recent.map(miniHtml).join('') : '<p class="muted" style="padding:6px 2px">Les bons signés apparaîtront ici.</p>';
   } else {
-    $('#kpis').innerHTML = `<div class="note note-warn" style="grid-column:1/-1">${icon('alert')}Serveur injoignable. Lancez « npm start » puis rechargez.</div>`;
+    $('#kpis').innerHTML = `<div class="note note-warn" style="grid-column:1/-1">${icon('alert')}Connexion au service impossible pour le moment. Réessayez dans un instant.</div>`;
   }
   if (agR.status === 'fulfilled') {
     state.agenda = agR.value.events;
@@ -2369,69 +2398,59 @@ function renderRegistre() {
       <div class="rc-act">${actions(b, true)}</div></article>`).join('')}</div>`;
 }
 
-/* -------------------------------------------------------------- réglages -- */
+/* -------------------------------------------------------------- réglages --
+   Écran vu par la direction de HK : ce qu'ils ont besoin de savoir, et rien
+   sur la machinerie qui est derrière (hébergement, base, automatisations).
+   Le détail technique reste dans MISE-EN-LIGNE.txt, côté agence.            */
 async function viewReglages() {
   const cfg = state.config || await api('GET', '/config').catch(() => null);
   const E = cfg?.entreprise || {};
-  const enLigne = MODE === 'supabase', make = cfg?.mail?.mode === 'make';
+  const enLigne = MODE === 'supabase', envoiAuto = cfg?.mail?.mode === 'make';
   const tpl = esc(agendaDescription()).replace(/^([^:\n]+):/gm, '<span class="k">$1</span>:');
-  const moi = Session.employe;
-  const compte = enLigne ? `
-      <section class="card">
-        <header class="card-h"><span class="ic">${icon('user')}</span><div><h2>Mon compte</h2><p>Compte HK (même que la feuille d'heures)</p></div></header>
-        <dl class="kv"><dt>Connecté</dt><dd>${esc(moi?.nom)}</dd><dt>Identifiant</dt><dd>${esc(moi?.id)}</dd><dt>Accès</dt><dd>${moi?.role === 'patron' ? 'Patron : tous les bons' : 'Mes bons'}</dd></dl>
-        <div class="row" style="margin-top:14px"><button type="button" class="btn btn-ghost btn-sm" data-act="deconnexion">${icon('arrowL')}Se déconnecter</button></div>
-      </section>` : '';
+
   const mail = enLigne
-    ? `<p><span class="status-dot${make ? ' on' : ''}">${make ? 'Envoi automatique via Make' : 'Envoi automatique pas encore branché'}</span></p>
-       <p class="muted" style="margin-top:8px">${make ? 'Chaque bon signé part vers Make : mail au chef de chantier avec le PDF, copie sur Google Drive et ligne dans « HK - Bons de location 2026 ».' : 'En attendant le scénario Make, le PDF signé se partage depuis l\'écran final (bouton Partager : mail, WhatsApp…). Il est déjà rangé dans Supabase et dans le registre.'}</p>`
-    : `<p><span class="status-dot${make ? ' on' : ''}">${make ? 'Envoi réel via Make' : 'Mode local : aucun mail réellement envoyé'}</span></p>
-       <p class="muted" style="margin-top:8px">${make ? 'Chaque bon signé part vers le scénario Make (Gmail + Google Sheets).' : 'Le mail (HTML + PDF) est préparé dans data/outbox pour vérification. Pour l\'envoi réel : mail.mode = "make" et l\'URL du webhook dans config.json.'}</p>`;
+    ? `<p><span class="status-dot${envoiAuto ? ' on' : ''}">${envoiAuto ? 'Envoi automatique actif' : 'Envoi automatique en préparation'}</span></p>
+       <p class="muted" style="margin-top:8px">${envoiAuto
+          ? 'Dès qu\'un bon est signé sur le chantier, le chef de chantier reçoit le PDF par mail, et une copie est archivée.'
+          : 'En attendant, le chauffeur envoie le PDF depuis son téléphone à la fin du bon (bouton Partager : mail, WhatsApp…). Le bon est déjà enregistré ici.'}</p>`
+    : `<p><span class="status-dot${envoiAuto ? ' on' : ''}">${envoiAuto ? 'Envoi réel' : 'Prototype : aucun mail réellement envoyé'}</span></p>`;
+
   const agenda = enLigne
-    ? `<p style="margin-bottom:12px"><span class="status-dot on">Synchronisé par Make</span></p>
+    ? `<p style="margin-bottom:12px"><span class="status-dot on">Planning synchronisé</span></p>
        <ol class="steps-list">
-         <li>Make lit le Google Agenda HK et dépose les événements des 7 prochains jours dans Supabase (table <code>agenda_bl</code>).</li>
-         <li>Écrire la description des événements avec le modèle ci-contre : chaque ligne remplit le champ du bon.</li>
-         <li>Dans le planning, « Préparer le bon » crée le bon déjà rempli.</li>
+         <li>Les interventions des 7 prochains jours arrivent ici depuis l'agenda.</li>
+         <li>Écrire la description de l'événement avec le modèle ci-contre : chaque ligne remplit un champ du bon.</li>
+         <li>Sur le chantier, « Préparer le bon » ouvre un bon déjà rempli.</li>
        </ol>`
-    : `<p style="margin-bottom:12px"><span class="status-dot${cfg?.agenda?.source === 'google' ? ' on' : ''}">${cfg?.agenda?.source === 'google' ? 'Agenda Google connecté' : 'Agenda de démonstration'}</span></p>
+    : `<p style="margin-bottom:12px"><span class="status-dot${cfg?.agenda?.source === 'google' ? ' on' : ''}">${cfg?.agenda?.source === 'google' ? 'Agenda connecté' : 'Agenda de démonstration'}</span></p>
        <ol class="steps-list">
-         <li>Dans Google Agenda : paramètres de l'agenda HK › <b>Intégrer l'agenda</b> › copier l'<b>adresse secrète au format iCal</b>.</li>
-         <li>La coller dans <code>config.json</code> › <code>agenda.icsUrl</code>, puis relancer le serveur.</li>
-         <li>Écrire la description des événements avec le modèle ci-contre : chaque ligne remplit le champ du bon.</li>
+         <li>Écrire la description de l'événement avec le modèle ci-contre : chaque ligne remplit un champ du bon.</li>
+         <li>Sur le chantier, « Préparer le bon » ouvre un bon déjà rempli.</li>
        </ol>`;
-  const deuxLiens = `
-      <section class="card">
-        <header class="card-h"><span class="ic">${icon('lock')}</span><div><h2>Les deux adresses</h2><p>Qui voit quoi</p></div></header>
-        <dl class="kv">
-          <dt>Cette page</dt><dd><b>Direction</b> — connexion obligatoire, tous les bons, les PDF et l'export.</dd>
-          <dt>Les chauffeurs</dt><dd><b>Lien ouvert</b>, sans mot de passe : ils remplissent et font signer les bons. Ils ne voient ni le registre, ni les bons des autres, seulement les interventions du jour et du lendemain.</dd>
-        </dl>
-        <p class="muted" style="margin-top:12px">Si le lien des chauffeurs circule trop, il suffit de renommer le dépôt GitHub : l'ancienne adresse ne répond plus.</p>
-      </section>`;
+
   app.innerHTML = `
-    <section class="page-h rise"><div><p class="eyebrow">Réglages</p><h1 class="display">Configuration</h1><p class="lead">${enLigne ? 'Version en ligne : données dans Supabase, envoi par Make.' : 'Prototype local : les réglages se modifient dans le fichier config.json.'}</p></div></section>
+    <section class="page-h rise"><div><p class="eyebrow">Réglages</p><h1 class="display">Informations</h1><p class="lead">L'en-tête des bons et la façon dont ils partent au chef de chantier.</p></div></section>
     <div class="set-grid">
-      ${compte}
-      ${enLigne ? deuxLiens : ''}
       <section class="card">
         <header class="card-h"><span class="ic">${icon('building')}</span><div><h2>Entreprise</h2><p>En-tête du bon de location</p></div></header>
         <dl class="kv"><dt>Raison sociale</dt><dd>${esc(E.nom)}</dd><dt>Adresse</dt><dd>${esc(E.adresse)}, ${esc(E.cpVille)}</dd><dt>Téléphone</dt><dd>${esc(E.tel)}</dd><dt>Email</dt><dd>${esc(E.email)}</dd><dt>Prochain N° de bon</dt><dd class="num" style="font-size:20px;color:var(--accent-ink)">${esc(cfg?.prochainNumero || '')}</dd></dl>
+        <p class="muted" style="margin-top:12px">Pour modifier ces informations, contactez SL Agence.</p>
       </section>
       <section class="card">
         <header class="card-h"><span class="ic">${icon('mail')}</span><div><h2>Envoi au chef de chantier</h2><p>PDF signé joint au mail</p></div></header>
         ${mail}
       </section>
       <section class="card">
-        <header class="card-h"><span class="ic">${icon('calendar')}</span><div><h2>Google Agenda</h2><p>Les bons se préremplissent depuis l'événement</p></div></header>
+        <header class="card-h"><span class="ic">${icon('calendar')}</span><div><h2>Planning</h2><p>Les bons se préremplissent depuis l'agenda</p></div></header>
         ${agenda}
       </section>
       <section class="card">
-        <header class="card-h"><span class="ic">${icon('note')}</span><div><h2>Modèle d'événement</h2><p>Même style que le bon</p></div></header>
+        <header class="card-h"><span class="ic">${icon('note')}</span><div><h2>Modèle d'événement</h2><p>À recopier dans l'agenda</p></div></header>
         <pre class="code" id="tpl">${tpl}</pre>
         <div class="row" style="margin-top:14px"><button class="btn btn-ghost btn-sm" data-act="copy-tpl">${icon('copy')}Copier le modèle</button><a class="btn btn-dark btn-sm" href="${gcalLink(null)}" target="_blank" rel="noopener">${icon('external')}Créer un événement modèle</a></div>
       </section>
-    </div>`;
+    </div>
+    ${enLigne && !AUTO ? `<div class="row" style="margin:22px 2px 0"><button type="button" class="btn btn-ghost btn-sm" data-act="deconnexion">${icon('arrowL')}Se déconnecter</button></div>` : ''}`;
 }
 
 </script>
@@ -2919,7 +2938,7 @@ function viewDone(bl) {
     : mail.statut === 'local' ? `<div class="note note-info">${icon('mail')}<span>Mail préparé pour <b>${esc(mail.to)}</b> avec le PDF en pièce jointe. <br>Prototype local : aucun envoi réel.</span></div>
         <div class="row" style="margin-top:12px"><button type="button" class="btn btn-ghost btn-sm" data-act="mail-preview" data-url="${mail.apercu}">${icon('eye')}Aperçu du mail</button><a class="btn btn-ghost btn-sm" href="${mail.eml}" download>${icon('download')}Fichier .eml</a></div>`
     : mail.statut === 'envoye' ? `<div class="note note-accent">${icon('check')}<span>Envoyé à <b>${esc(mail.to)}</b> le ${esc(frDateTime(mail.le))}.</span></div>`
-    : mail.statut === 'attente' ? `<div class="note note-info">${icon('mail')}<span>L'envoi automatique n'est pas encore branché. Utilisez <b>Partager</b> pour envoyer le PDF à <b>${esc(mail.to)}</b> (mail, WhatsApp…).</span></div>`
+    : mail.statut === 'attente' ? `<div class="note note-info">${icon('mail')}<span>L'envoi automatique n'est pas encore actif. Utilisez <b>Partager</b> pour envoyer le PDF à <b>${esc(mail.to)}</b> (mail, WhatsApp…).</span></div>`
     : `<div class="note note-warn">${icon('alert')}<span>${esc(mailLabel(mail))}</span></div>`;
   app.innerHTML = `
     <section class="done-hero">
@@ -2993,7 +3012,7 @@ function changed({ rerender = false } = {}) {
 const spinnerPage = txt => `<div style="display:grid;place-items:center;gap:14px;padding:90px 0;color:var(--muted)"><div class="spinner"></div>${txt ? `<p>${esc(txt)}</p>` : ''}</div>`;
 
 async function route() {
-  if (MODE === 'supabase' && DIRECTION && !Session.employe) return viewLogin();
+  if (MODE === 'supabase' && DIRECTION && !Session.employe && !(await connexionAuto())) return viewLogin(messageAuto());
   const [path, qs] = (location.hash.slice(1) || '/').split('?');
   const seg = path.split('/').filter(Boolean);
   const q = new URLSearchParams(qs || '');
@@ -3237,7 +3256,7 @@ window.addEventListener('hashchange', route);
 document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') saveNow(); });
 
 (async function boot() {
-  if (MODE === 'supabase' && DIRECTION && !Session.employe) return viewLogin();
+  if (MODE === 'supabase' && DIRECTION && !Session.employe && !(await connexionAuto())) return viewLogin(messageAuto());
   try { state.config = await api('GET', '/config'); } catch { /* affiché par les vues */ }
   route();
 })();
