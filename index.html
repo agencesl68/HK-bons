@@ -69,6 +69,14 @@ window.HKBL_CONFIG = {
 html{-webkit-text-size-adjust:100%;scroll-behavior:smooth}
 body{margin:0;font-family:var(--sans);font-size:16px;line-height:1.5;color:var(--ink);background:var(--bg);
   -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;-webkit-tap-highlight-color:transparent;overflow-x:hidden}
+
+/* iPhone : deux appuis rapides au même endroit déclenchent un zoom. On le coupe
+   sur tout ce qui se clique — les − / + des heures et des tours, les onglets,
+   les jours, les cases à cocher. Le pincer-pour-zoomer reste possible, et la
+   zone de signature garde son propre réglage (touch-action:none). */
+a,button,label,summary,select,input,textarea,
+[data-act],[data-ts],[data-sf],[data-nav],[data-close]{touch-action:manipulation}
+button,.day,.seg>*,.tabbar a,.topnav a,.mat-card,.tfield{-webkit-user-select:none;user-select:none}
 h1,h2,h3,p{margin:0}
 button,input,select,textarea{font:inherit;color:inherit}
 a{color:inherit}
@@ -2742,6 +2750,27 @@ function timeField(label, key) {
     </div></div>`;
 }
 
+/* Appuis rapides sur − / + : on met à jour les quelques endroits concernés
+   au lieu de redessiner toute l'étape. Redessiner remplaçait le bouton sous
+   le doigt, et les appuis suivants se perdaient. */
+function majHeures(cle) {
+  const bl = state.bl, h = bl.horaires;
+  const champ = $(`[data-time="horaires.${cle}"]`);
+  if (champ) {
+    champ.classList.toggle('empty', !h[cle]);
+    const val = champ.querySelector('.t-val');
+    if (val) val.textContent = h[cle] || '--:--';
+    clearFieldError(champ);
+  }
+  $$('.period').forEach(p => {
+    const [a, b] = $$('[data-time]', p).map(e => e.dataset.time.split('.')[1]);
+    const d = dur(h[a], h[b]), el = p.querySelector('.p-dur');
+    if (el) { el.textContent = fmtH(d); el.classList.toggle('zero', !d); }
+  });
+  const recap = $('.hrecap');
+  if (recap) recap.outerHTML = hoursRecapHtml(bl);
+}
+
 function hoursRecapHtml(bl) {
   const h = bl.horaires, c = bl.facturation.continu, mins = minutesTotal(bl);
   const row = (l, a, b) => `<div class="hr-row"><span>${l}</span><b>${a && b ? `${a} → ${b}` : '—'}</b><em>${fmtH(dur(a, b))}</em></div>`;
@@ -3126,7 +3155,10 @@ document.addEventListener('focusin', e => { if (toucher.matches && estChampTexte
 document.addEventListener('focusout', () => setTimeout(() => { if (!estChampTexte(document.activeElement)) document.body.classList.remove('typing'); }, 60));
 
 /* --------------------------------------------------------------- actions -- */
-const setTime = (key, v) => { state.bl.horaires[key] = v; changed({ rerender: true }); };
+const setTime = (key, v, surPlace) => {
+  state.bl.horaires[key] = v;
+  if (surPlace) { majHeures(key); changed(); } else changed({ rerender: true });
+};
 
 const ACTIONS = {
   // planning
@@ -3216,7 +3248,7 @@ const ACTIONS = {
   'del-ligne': t => { state.bl.lignes.splice(+t.dataset.i, 1); changed({ rerender: true }); },
   // heures
   't-open': t => openTimeSheet(`horaires.${t.dataset.k}`, v => setTime(t.dataset.k, v)),
-  't-step': t => { const k = t.dataset.k, cur = state.bl.horaires[k]; setTime(k, cur ? fromMin(roundQ(toMin(cur)) + +t.dataset.d) : DEFAULT_T[k]); },
+  't-step': t => { const k = t.dataset.k, cur = state.bl.horaires[k]; setTime(k, cur ? fromMin(roundQ(toMin(cur)) + +t.dataset.d) : DEFAULT_T[k], true); },
   preset: () => { const h = state.bl.horaires; if (state.bl.facturation.continu) Object.assign(h, { matinArr: '07:30', matinDep: '15:30' }); else Object.assign(h, DEFAULT_T); clearErrors(); changed({ rerender: true }); },
   'apply-prevu': () => {
     const p = state.bl.source.prevu, h = state.bl.horaires;
