@@ -308,6 +308,36 @@ body.is-wizard .toasts{bottom:calc(var(--bar-h) + 18px + env(safe-area-inset-bot
 .hero .display,.page-h .display{margin-top:6px}
 .hero-cta{flex:none}
 .nav-retour{color:var(--muted)!important}
+
+/* ------------------------------------------------- plusieurs engins ------ */
+/* L'engin déjà choisi, en tête de sa carte, avec le bouton « Changer ». */
+.engin-choisi{display:flex;align-items:center;gap:14px;padding:12px 14px;border-radius:14px;background:var(--accent-soft);border:1px solid var(--accent-line)}
+.engin-choisi .ec-ill{width:64px;flex:none;color:var(--accent-ink)}
+.engin-choisi .ec-ill .ill{width:100%;height:auto}
+.engin-choisi .ec-txt{flex:1;min-width:0}
+.engin-choisi .ec-txt b{display:block;font-size:17px;font-weight:800;letter-spacing:-.01em}
+.engin-choisi .ec-txt span{display:block;font-size:12.5px;color:var(--accent-ink);font-weight:600}
+
+/* Séparateur entre deux engins à l'étape Prestation. */
+.engin-sep{display:flex;align-items:center;gap:10px;margin:26px 2px 10px;font-family:var(--display);font-size:19px;font-weight:800;text-transform:uppercase;letter-spacing:.01em;color:var(--ink)}
+.engin-sep .ill{width:46px;height:auto;flex:none;color:var(--accent)}
+.engin-sep span{font-family:var(--sans);font-size:13px;font-weight:600;text-transform:none;color:var(--muted)}
+.engin-sep::after{content:"";flex:1;height:1px;background:var(--line)}
+
+/* Liste des engins dans l'aperçu latéral. */
+.l-engins{display:flex;flex-direction:column;gap:8px;margin:14px 0 4px}
+.l-eng{display:flex;align-items:center;gap:10px}
+.l-eng .ill{width:40px;height:auto;flex:none;color:var(--accent)}
+.l-eng div{flex:1;min-width:0}
+.l-eng b{display:block;font-size:13.5px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.l-eng span{display:block;font-size:11.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.l-eng em{font-family:var(--display);font-style:normal;font-weight:800;font-size:15px;color:var(--accent-ink)}
+
+/* Titre d'un engin dans le récap des heures. */
+.hr-eng{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin:12px 0 2px;font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--accent-ink)}
+.hr-eng:first-child{margin-top:2px}
+.t-plus{display:inline-block;margin-left:6px;padding:1px 6px;border-radius:999px;background:var(--accent-soft);color:var(--accent-ink);font-size:11px;font-weight:800;vertical-align:1px}
+.hr-eng em{font-family:var(--display);font-style:normal;font-size:16px;color:var(--ink)}
 .mini-row{display:flex;align-items:center;gap:6px}
 .mini-row .mini{flex:1;min-width:0}
 .hero-note{display:inline-flex;align-items:center;gap:7px;margin-top:12px;padding:7px 12px;border-radius:999px;background:var(--accent-soft);color:var(--accent-ink);font-size:13px;font-weight:700}
@@ -362,6 +392,9 @@ body.is-wizard .toasts{bottom:calc(var(--bar-h) + 18px + env(safe-area-inset-bot
 .ev-meta span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .ev-act{grid-column:1 / -1;display:flex;align-items:center;gap:10px;padding-top:12px;border-top:1px dashed var(--line)}
 .ev-act .btn{margin-left:auto}
+/* intervention déjà faite, côté chauffeur : rien à rouvrir, juste le constat */
+.ev-fait{margin-left:auto;display:inline-flex;align-items:center;gap:7px;font-weight:700;font-size:14px;color:var(--good)}
+.ev-fait .i{width:17px;height:17px}
 @media (min-width:640px){.event{grid-template-columns:70px minmax(0,1fr) auto;align-items:center}.ev-act{grid-column:auto;border:none;padding:0}}
 
 .mini-list{display:flex;flex-direction:column}
@@ -695,6 +728,60 @@ body.is-wizard .toasts{bottom:calc(var(--bar-h) + 18px + env(safe-area-inset-bot
 .login-card{text-align:left;display:grid;gap:16px;margin-top:22px}
 .login-card .err-msg[hidden]{display:none}
 
+/* ---------------------------------------------------------- carte du chantier --
+   Tuiles OpenStreetMap. À l'arrivée, la vue est un peu zoomée et voilée, puis
+   elle se pose : on comprend d'un coup d'œil où se trouve le chantier. */
+.carte{position:relative;margin:14px 0 0;border:1px solid var(--line-2);border-radius:16px;overflow:hidden;background:var(--surface-2);
+  opacity:0;transform:translateY(8px);transition:opacity .45s var(--ease),transform .55s var(--spring)}
+.carte.posee{opacity:1;transform:none}
+.carte-vue{position:relative;height:172px;overflow:hidden;background:#E8E4DC}
+.carte-mosaique{position:absolute;left:50%;top:50%;width:768px;height:768px;
+  transform:scale(1.3);filter:blur(7px) saturate(.5);transition:transform 1.15s cubic-bezier(.19,1,.22,1),filter .95s var(--ease)}
+.carte.posee .carte-mosaique{transform:scale(1);filter:none}
+.tuile{position:absolute;width:256px;height:256px;display:block;border:0}
+.tuile.vide{background:#E8E4DC}
+/* le repère tombe une fois la carte posée */
+.carte-pin{position:absolute;left:50%;top:50%;width:38px;height:38px;margin:-44px 0 0 -19px;display:grid;place-items:center;
+  border-radius:50% 50% 50% 4px;transform:rotate(-45deg) scale(.4);opacity:0;
+  background:var(--accent);color:#fff;box-shadow:0 8px 20px -6px rgba(23,24,27,.55);
+  transition:transform .5s var(--spring) .3s,opacity .25s linear .3s}
+.carte-pin .i{transform:rotate(45deg);width:19px;height:19px;stroke-width:2.4}
+.carte.posee .carte-pin{transform:rotate(-45deg) scale(1);opacity:1}
+.carte-onde{position:absolute;left:50%;top:50%;width:16px;height:16px;margin:-8px 0 0 -8px;border-radius:50%;
+  background:var(--accent);opacity:0}
+.carte.posee .carte-onde{animation:carte-onde 2.4s var(--ease) .75s 2}
+@keyframes carte-onde{0%{opacity:.5;transform:scale(1)}100%{opacity:0;transform:scale(6)}}
+.carte-pied{display:flex;align-items:center;gap:12px;padding:11px 13px;background:var(--surface);border-top:1px solid var(--line)}
+.carte-lieu{display:flex;align-items:center;gap:7px;min-width:0;font-size:13.5px;color:var(--ink-2);font-weight:600}
+.carte-lieu span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.carte-lieu .i{width:16px;height:16px;flex:none;color:var(--accent-ink)}
+.carte-pied .btn{margin-left:auto;flex:none}
+.carte-credit{position:absolute;right:7px;top:148px;font-size:10px;line-height:1;padding:3px 5px;border-radius:5px;
+  background:rgba(255,255,255,.82);color:#5C5852;pointer-events:none}
+@media (prefers-reduced-motion:reduce){
+  .carte,.carte-mosaique,.carte-pin{transition:none}
+  .carte{opacity:1;transform:none}.carte-mosaique{transform:none;filter:none}
+  .carte-pin{transform:rotate(-45deg);opacity:1}.carte.posee .carte-onde{animation:none}
+}
+
+/* ------------------------------------------------------------ choix du GPS -- */
+.gps-adresse{display:flex;align-items:center;gap:8px;margin:2px 0 16px;font-size:14px;color:var(--ink-2);font-weight:600}
+.gps-adresse .i{width:17px;height:17px;flex:none;color:var(--accent-ink)}
+.gps-liste{display:flex;flex-direction:column;gap:8px}
+.gps-choix{display:flex;align-items:center;gap:13px;width:100%;padding:12px 14px;min-height:64px;
+  border:1px solid var(--line-2);border-radius:14px;background:var(--surface);text-decoration:none;color:inherit;
+  cursor:pointer;text-align:left;font:inherit;transition:transform .14s var(--spring),border-color .2s,background .2s}
+.gps-choix:hover{border-color:var(--ink-2);background:var(--surface-2)}
+.gps-choix:active{transform:scale(.985)}
+.gps-ic{width:40px;height:40px;flex:none;border-radius:11px;display:grid;place-items:center;
+  color:#fff;font-weight:800;font-size:18px;line-height:1}
+.gps-ic-pale{background:var(--surface-2);color:var(--ink-2);border:1px solid var(--line-2)}
+.gps-ic .i{width:19px;height:19px}
+.gps-txt{display:flex;flex-direction:column;gap:2px;min-width:0;flex:1}
+.gps-txt b{font-size:16px;font-weight:700}
+.gps-txt span{font-size:12.5px;color:var(--muted)}
+.gps-choix > .i:last-child{width:18px;height:18px;flex:none;color:var(--muted)}
+
 </style>
 <style>
 /* =============================================================================
@@ -761,6 +848,11 @@ body.typing .actionbar, body.typing .tabbar { transform: translateY(calc(100% + 
   .ev-act .btn { flex: 1; }
   .mini .m-t, .mini .m-s { white-space: normal; }
   .mini-row .m-ill { display: none; }        /* place à la corbeille sur le téléphone */
+  .engin-sep { margin: 20px 2px 8px; font-size: 17px; }
+  .engin-sep .ill { width: 38px; }
+  .engin-choisi { gap: 10px; padding: 10px 12px; }
+  .engin-choisi .ec-ill { width: 52px; }
+  .engin-choisi .ec-txt b { font-size: 15.5px; }
 
   /* ---------- registre ---------- */
   .page-h { margin-bottom: 14px; }
@@ -939,14 +1031,75 @@ function brouillonsLocaux() {
   return out.sort((a, b) => String(b.majLe || '').localeCompare(String(a.majLe || '')));
 }
 
+/* Les bons déjà faits pour une intervention du planning, rangés par événement.
+   Le lien des chauffeurs ne lit pas la base : sans cette mémoire locale, la
+   carte du planning proposerait encore « Préparer le bon » pour une inter-
+   vention déjà traitée, et le chauffeur créerait un deuxième bon. */
+function bonsLocauxParEvenement() {
+  const out = {};
+  for (const bl of brouillonsLocaux()) {
+    if (bl.source?.agendaUid) out[`${bl.source.agendaUid}|${bl.date}`] = resumeLocal(bl);
+  }
+  for (const s of LS.get(CLE('signes'), []) || []) {
+    if (s.uid) out[`${s.uid}|${s.date}`] = { id: s.id, numero: s.numero, statut: s.statut || 'signe', date: s.date, client: s.client, minutes: s.minutes || 0 };
+  }
+  return out;
+}
+
+/* Un chauffeur reprend presque toujours le même camion. On retient donc la
+   plaque et la remorque PAR type d'engin : au bon suivant, choisir « Semi 44T »
+   les remet tout seul, au lieu de les retaper chaque matin avec des gants. */
+function memoriserEngins(bl) {
+  const prefs = LS.get(CLE('prefs'), {});
+  const immats = { ...(prefs.immats || {}) };
+  for (const e of enginsRemplis(bl)) {
+    if ((e.immat || '').trim()) immats[e.type] = { immat: e.immat.trim(), remorque: (e.remorque || '').trim() };
+  }
+  LS.set(CLE('prefs'), {
+    ...prefs, immats,
+    conducteur: (bl.engins?.[0]?.conducteur || '').trim() || prefs.conducteur || '',
+    telConducteur: (bl.engins?.[0]?.telConducteur || '').trim() || prefs.telConducteur || '',
+  });
+}
+const immatConnue = type => LS.get(CLE('prefs'), {}).immats?.[type] || null;
+
+/* ------------------------------------------------------- carte du chantier --
+   L'adresse du chantier est transformée en coordonnées par l'API Adresse de
+   l'État (adresse.data.gouv.fr) : gratuite, sans compte, faite pour les
+   adresses françaises. Les réponses sont gardées sur le téléphone, donc un
+   chantier déjà vu s'affiche sans réseau. Jamais bloquant : si ça ne répond
+   pas, la carte ne s'affiche pas, et la saisie continue normalement.        */
+const adresseChantier = bl => [bl?.chantier?.adresse, bl?.chantier?.ville].map(s => (s || '').trim()).filter(Boolean).join(' ').trim();
+
+async function geocoder(adresse) {
+  const q = adresse.trim();
+  if (q.length < 6) return null;
+  const cache = LS.get(CLE('geo'), {});
+  const cle = norm(q);
+  if (cache[cle] !== undefined) return cache[cle];
+  let trouve = null;
+  try {
+    const r = await fetchDelai(`https://api-adresse.data.gouv.fr/search/?limit=1&q=${encodeURIComponent(q)}`, {}, 8000);
+    const j = r.ok ? await r.json() : null;
+    const f = j?.features?.[0];
+    // en dessous de 0.4 le résultat est trop incertain pour être montré comme « le chantier »
+    if (f?.geometry?.coordinates && (f.properties?.score ?? 0) >= 0.4) {
+      trouve = { lon: f.geometry.coordinates[0], lat: f.geometry.coordinates[1], label: f.properties.label || q };
+    }
+  } catch { return null; }   // hors ligne : on ne garde pas l'échec en mémoire
+  LS.set(CLE('geo'), { ...Object.fromEntries(Object.entries(cache).slice(-60)), [cle]: trouve });
+  return trouve;
+}
+
 // Un brouillon local présenté comme une ligne de registre (cartes « Bons en cours »)
 const resumeLocal = bl => ({
   id: bl.id, numero: bl.numero, statut: bl.statut, date: bl.date, majLe: bl.majLe,
   client: bl.client?.nom || '', chantier: bl.chantier?.nom || bl.chantier?.ville || '', numChantier: bl.chantier?.numero || '',
-  chef: bl.chef?.nom || '', chefEmail: bl.chef?.email || '', materiel: bl.materiel?.type || '',
-  materielLibre: bl.materiel?.libreDesignation || '', designation: designationPrincipale(bl),
-  immat: bl.materiel?.immat || '', conducteur: bl.materiel?.conducteur || '',
-  minutes: minutesTotal(bl), facturation: bl.facturation?.mode || '', pdf: null, mail: null,
+  chef: bl.chef?.nom || '', chefEmail: bl.chef?.email || '', materiel: bl.engins?.[0]?.type || '',
+  materielLibre: bl.engins?.[0]?.libreDesignation || '', designation: designationPrincipale(bl),
+  immat: bl.engins?.map(e => e.immat).filter(Boolean).join(' · ') || '',
+  conducteur: bl.engins?.map(e => e.conducteur).filter(Boolean).join(' · ') || '',
+  minutes: minutesTotal(bl), facturation: bl.engins?.[0]?.facturation?.mode || '', pdf: null, mail: null,
 });
 
 // Téléchargement d'un fichier fabriqué dans le téléphone (PDF signé, registre CSV)
@@ -995,13 +1148,25 @@ const LS = {
   del(k) { try { localStorage.removeItem(k); } catch { /* idem */ } },
 };
 
+/* Sur un chantier, le téléphone a souvent du réseau sans avoir de débit :
+   sans délai maximum, fetch attend indéfiniment et l'écran reste figé sur
+   son rond qui tourne, sans rien à faire d'autre que fermer l'app. */
+function fetchDelai(url, opt = {}, ms = 20000) {
+  const ac = new AbortController();
+  const t = setTimeout(() => ac.abort(new DOMException('Délai dépassé', 'TimeoutError')), ms);
+  return fetch(url, { ...opt, signal: ac.signal }).finally(() => clearTimeout(t));
+}
+const messageReseau = e => (e?.name === 'TimeoutError' || e?.name === 'AbortError'
+  ? 'Le réseau est trop lent ici. Réessayez, ou avancez : le bon reste gardé sur le téléphone.'
+  : 'Pas de réseau pour le moment');
+
 async function api(method, path, body) {
   let r;
   try {
-    r = await fetch(API + path, { method, headers: body ? { 'Content-Type': 'application/json' } : {}, body: body ? JSON.stringify(body) : undefined });
-  } catch {
+    r = await fetchDelai(API + path, { method, headers: body ? { 'Content-Type': 'application/json' } : {}, body: body ? JSON.stringify(body) : undefined });
+  } catch (e) {
     setOnline(false);
-    throw new Error('Serveur injoignable');
+    throw new Error(messageReseau(e));
   }
   setOnline(true);
   const data = await r.json().catch(() => ({}));
@@ -1098,7 +1263,7 @@ const MATERIEL = [
   { id: 'autre', label: 'Autre', cat: 'autre', ill: 'autre' },
 ];
 const matById = id => MATERIEL.find(m => m.id === id) || null;
-const catOf = bl => matById(bl?.materiel?.type)?.cat || null;
+const catOf = e => matById(e?.type)?.cat || null;   // e = un engin du bon
 const FACT = [{ id: 'heure', label: 'Heure' }, { id: 'tonnes', label: 'Tonnes' }, { id: 'm3', label: 'M³' }, { id: 'forfait', label: 'Forfait' }];
 const FACT_BY_CAT = { camion: ['heure', 'tonnes', 'm3', 'forfait'], pelle: ['heure'], transfert: ['heure', 'forfait'], autre: ['heure', 'tonnes', 'm3', 'forfait'] };
 const factLabel = id => FACT.find(f => f.id === id)?.label || '';
@@ -1111,64 +1276,91 @@ const STEPS = [
 ];
 
 /* -------------------------------------------------------------- modèle -- */
+const fusion = (a, b) => { for (const k of Object.keys(b || {})) { if (b[k] && typeof b[k] === 'object' && !Array.isArray(b[k]) && a[k] && typeof a[k] === 'object') fusion(a[k], b[k]); else if (b[k] !== undefined) a[k] = b[k]; } return a; };
+
+/* ------------------------------------------------------ engins du bon -----
+   Un bon porte une LISTE d'engins. Chacun a son conducteur, son immatri-
+   culation, sa facturation, ses horaires, ses trajets et ses matériaux :
+   sur un même chantier la pelle et le camion n'ont ni le même chauffeur
+   ni les mêmes heures.
+   Les bons enregistrés avant cette évolution n'ont qu'un « materiel » :
+   versEngins() les convertit en un engin unique, sans rien perdre.        */
+function newEngin(extra = {}) {
+  return fusion({
+    type: '', libreDesignation: '', immat: '', remorque: '', conducteur: '', telConducteur: '',
+    facturation: { mode: 'heure', nuit: false, continu: false },
+    horaires: { matinArr: '', matinDep: '', amArr: '', amDep: '' },
+    trajets: [], materiaux: [],
+  }, extra);
+}
+
+function versEngins(o) {
+  if (!o || o.engins || !(o.materiel || o.horaires)) return o;
+  const { materiel, facturation, horaires, trajets, materiaux, ...reste } = o;
+  return { ...reste, engins: [newEngin({ ...materiel, facturation, horaires, trajets, materiaux })] };
+}
+
 function newBL(extra = {}) {
-  const prefs = LS.get(CLE('prefs'), {});
   const base = {
     id: uid(), numero: null, statut: 'brouillon', date: isoDay(),
     client: { nom: '', adresse: '' },
     chantier: { nom: '', numero: '', commande: '', ville: '', adresse: '' },
     chef: { nom: '', tel: '', email: '' },
-    materiel: { type: '', libreDesignation: '', immat: '', remorque: '', conducteur: prefs.conducteur || '', telConducteur: prefs.telConducteur || '' },
-    facturation: { mode: 'heure', nuit: false, continu: false },
-    trajets: [], materiaux: [], lignes: [],
-    horaires: { matinArr: '', matinDep: '', amArr: '', amDep: '' },
+    engins: [], lignes: [],
     observations: '',
     signature: { nom: '', tel: '', image: null, date: null, cgv: false },
     source: { agendaUid: null, titre: '', prevu: null },
   };
-  const merge = (a, b) => { for (const k of Object.keys(b)) { if (b[k] && typeof b[k] === 'object' && !Array.isArray(b[k]) && a[k] && typeof a[k] === 'object') merge(a[k], b[k]); else if (b[k] !== undefined) a[k] = b[k]; } return a; };
-  return merge(base, extra);
+  const bl = fusion(base, versEngins(extra) || {});
+  bl.engins = (bl.engins.length ? bl.engins : [{}]).map(e => newEngin(e));
+  return bl;
 }
 
-const minutesTotal = bl => {
-  const h = bl.horaires || {};
-  return bl.facturation?.continu ? dur(h.matinArr, h.matinDep) : dur(h.matinArr, h.matinDep) + dur(h.amArr, h.amDep);
+const minutesEngin = e => {
+  const h = e?.horaires || {};
+  return e?.facturation?.continu ? dur(h.matinArr, h.matinDep) : dur(h.matinArr, h.matinDep) + dur(h.amArr, h.amDep);
 };
-const totalMateriaux = bl => (bl.materiaux || []).reduce((s, m) => s + m.pesees.reduce((a, p) => a + num(p.poids), 0), 0);
-const totalTours = bl => (bl.trajets || []).reduce((s, t) => s + (parseInt(t.tours, 10) || 0), 0);
-const unitMat = bl => bl.facturation?.mode === 'm3' ? 'm³' : 't';
+const materiauxEngin = e => (e?.materiaux || []).reduce((s, m) => s + m.pesees.reduce((a, p) => a + num(p.poids), 0), 0);
+const toursEngin = e => (e?.trajets || []).reduce((s, t) => s + (parseInt(t.tours, 10) || 0), 0);
+const enginsRemplis = bl => (bl.engins || []).filter(e => matById(e.type));
 
-function designationPrincipale(bl) {
-  const m = matById(bl.materiel.type); if (!m) return '';
-  let d = m.cat === 'autre' ? (bl.materiel.libreDesignation || 'Autre') : m.label;
-  if (m.cat === 'transfert' && bl.materiel.libreDesignation) d += ` · ${bl.materiel.libreDesignation}`;
-  const mods = [bl.facturation.nuit && 'nuit', bl.facturation.continu && 'en continu'].filter(Boolean);
+const minutesTotal = bl => (bl.engins || []).reduce((s, e) => s + minutesEngin(e), 0);
+const totalMateriaux = bl => (bl.engins || []).reduce((s, e) => s + materiauxEngin(e), 0);
+const totalTours = bl => (bl.engins || []).reduce((s, e) => s + toursEngin(e), 0);
+const unitMat = e => (e?.facturation?.mode === 'm3' ? 'm³' : 't');   // e = un engin
+
+function designationEngin(e) {
+  const m = matById(e?.type); if (!m) return '';
+  let d = m.cat === 'autre' ? (e.libreDesignation || 'Autre') : m.label;
+  if (m.cat === 'transfert' && e.libreDesignation) d += ` · ${e.libreDesignation}`;
+  const mods = [e.facturation?.nuit && 'nuit', e.facturation?.continu && 'en continu'].filter(Boolean);
   return mods.length ? `${d} (${mods.join(', ')})` : d;
 }
+// Tous les engins du bon, pour le mail, le registre et le classeur
+const designationPrincipale = bl => enginsRemplis(bl).map(designationEngin).join(' + ');
 
 // Lignes du bon (tableau du PDF et récapitulatif)
 function lignesBL(bl) {
-  const m = matById(bl.materiel.type); const cat = m?.cat; const f = bl.facturation;
   const rows = [];
-  if (m) {
-    const mins = minutesTotal(bl), tm = totalMateriaux(bl);
+  for (const e of enginsRemplis(bl)) {
+    const cat = catOf(e), f = e.facturation || {}, mins = minutesEngin(e), tm = materiauxEngin(e);
     const q = { heure: [mins ? fmtDec(mins) : '', 'h'], tonnes: [tm ? fmtNum(tm) : '', 't'], m3: [tm ? fmtNum(tm) : '', 'm³'], forfait: ['1', 'forfait'] }[f.mode] || ['', ''];
-    rows.push({ type: 'principal', designation: designationPrincipale(bl), qte: q[0], unite: q[1] });
+    rows.push({ type: 'principal', designation: designationEngin(e), qte: q[0], unite: q[1] });
+    if (cat === 'camion' || cat === 'transfert') {
+      (e.trajets || []).filter(t => t.depart || t.arrivee).forEach((t, i, arr) => rows.push({
+        type: 'trajet', designation: cat === 'transfert' ? 'Transfert' : (arr.length > 1 ? `Trajet ${i + 1}` : 'Trajet'),
+        depart: t.depart, arrivee: t.arrivee, tours: String(parseInt(t.tours, 10) || 1),
+      }));
+    }
+    if (cat === 'camion') {
+      (e.materiaux || []).forEach(mat => {
+        const ps = mat.pesees.filter(p => p.poids || p.num);
+        if (!ps.length) rows.push({ type: 'materiau', designation: mat.nom });
+        ps.forEach(p => rows.push({ type: 'materiau', designation: mat.nom, qte: p.poids ? fmtNum(num(p.poids)) : '', unite: p.poids ? unitMat(e) : '', pesee: p.num }));
+      });
+    }
   }
-  if (cat === 'camion' || cat === 'transfert') {
-    bl.trajets.filter(t => t.depart || t.arrivee).forEach((t, i, arr) => rows.push({
-      type: 'trajet', designation: cat === 'transfert' ? 'Transfert' : (arr.length > 1 ? `Trajet ${i + 1}` : 'Trajet'),
-      depart: t.depart, arrivee: t.arrivee, tours: String(parseInt(t.tours, 10) || 1),
-    }));
-  }
-  if (cat === 'camion') {
-    bl.materiaux.forEach(mat => {
-      const ps = mat.pesees.filter(p => p.poids || p.num);
-      if (!ps.length) rows.push({ type: 'materiau', designation: mat.nom });
-      ps.forEach(p => rows.push({ type: 'materiau', designation: mat.nom, qte: p.poids ? fmtNum(num(p.poids)) : '', unite: p.poids ? unitMat(bl) : '', pesee: p.num }));
-    });
-  }
-  bl.lignes.filter(l => l.designation || l.quantite).forEach(l => rows.push({ type: 'libre', designation: l.designation, qte: l.quantite, unite: l.unite }));
+  (bl.lignes || []).filter(l => l.designation || l.quantite).forEach(l => rows.push({ type: 'libre', designation: l.designation, qte: l.quantite, unite: l.unite }));
   return rows;
 }
 
@@ -1195,7 +1387,11 @@ function matchMateriel(v) {
 }
 function fromAgenda(ev) {
   const p = { date: ev.date, source: { agendaUid: ev.uid, titre: ev.titre, prevu: ev.debut && ev.fin ? { debut: ev.debut, fin: ev.fin } : null } };
-  const bl = newBL(); const trajet = { depart: '', arrivee: '', tours: 1 };
+  const bl = newBL();
+  const e = bl.engins[0];                 // l'agenda décrit une intervention : un engin
+  // « materiel.immat », « facturation »… du modèle d'événement visent cet engin
+  const cible = { client: bl.client, chantier: bl.chantier, chef: bl.chef, materiel: e, facturation: e.facturation, observations: '' };
+  const trajet = { depart: '', arrivee: '', tours: 1 };
   const lines = `${ev.description || ''}`.split(/\n/);
   for (const line of lines) {
     const i = line.indexOf(':'); if (i < 0) continue;
@@ -1203,19 +1399,20 @@ function fromAgenda(ev) {
     const val = line.slice(i + 1).trim(); if (!val) continue;
     const hit = AGENDA_KEYS.find(([k]) => key === k); if (!hit) continue;
     const target = hit[1];
-    if (target === '@materiel') { const id = matchMateriel(val); if (id) bl.materiel.type = id; else { bl.materiel.type = 'autre'; bl.materiel.libreDesignation = val; } }
-    else if (target === '@facturation') { const n = norm(val); if (/tonne/.test(n)) bl.facturation.mode = 'tonnes'; else if (/m3|m ?cube/.test(n)) bl.facturation.mode = 'm3'; else if (/forfait/.test(n)) bl.facturation.mode = 'forfait'; else if (/heure/.test(n)) bl.facturation.mode = 'heure'; if (/nuit/.test(n)) bl.facturation.nuit = true; if (/continu/.test(n)) bl.facturation.continu = true; }
+    if (target === '@materiel') { const id = matchMateriel(val); if (id) e.type = id; else { e.type = 'autre'; e.libreDesignation = val; } }
+    else if (target === '@facturation') { const n = norm(val); if (/tonne/.test(n)) e.facturation.mode = 'tonnes'; else if (/m3|m ?cube/.test(n)) e.facturation.mode = 'm3'; else if (/forfait/.test(n)) e.facturation.mode = 'forfait'; else if (/heure/.test(n)) e.facturation.mode = 'heure'; if (/nuit/.test(n)) e.facturation.nuit = true; if (/continu/.test(n)) e.facturation.continu = true; }
     else if (target === '@depart') trajet.depart = val;
     else if (target === '@arrivee') trajet.arrivee = val;
     else if (target === '@tours') trajet.tours = parseInt(val, 10) || 1;
-    else if (target === '@materiaux') val.split(/\s*[;+]\s*/).filter(Boolean).forEach(nom => bl.materiaux.push({ nom: MATERIAUX.find(x => norm(x) === norm(nom)) || nom, pesees: [{ poids: '', num: '' }] }));
-    else setPath(bl, target, val);
+    else if (target === '@materiaux') val.split(/\s*[;+]\s*/).filter(Boolean).forEach(nom => e.materiaux.push({ nom: MATERIAUX.find(x => norm(x) === norm(nom)) || nom, pesees: [{ poids: '', num: '' }] }));
+    else setPath(cible, target, val);
   }
+  bl.observations = cible.observations;
   if (!bl.chantier.adresse && ev.lieu) bl.chantier.adresse = ev.lieu;
-  if (trajet.depart || trajet.arrivee) bl.trajets.push(trajet);
-  const cat = catOf(bl);
-  if (cat && !FACT_BY_CAT[cat].includes(bl.facturation.mode)) bl.facturation.mode = FACT_BY_CAT[cat][0];
-  if ((cat === 'camion' || cat === 'transfert') && !bl.trajets.length) bl.trajets.push({ depart: '', arrivee: '', tours: 1 });
+  if (trajet.depart || trajet.arrivee) e.trajets.push(trajet);
+  const cat = catOf(e);
+  if (cat && !FACT_BY_CAT[cat].includes(e.facturation.mode)) e.facturation.mode = FACT_BY_CAT[cat][0];
+  if ((cat === 'camion' || cat === 'transfert') && !e.trajets.length) e.trajets.push({ depart: '', arrivee: '', tours: 1 });
   const { id, numero, statut, ...rest } = bl;
   return { ...rest, ...p, signature: { nom: bl.chef.nom, tel: bl.chef.tel, image: null, date: null, cgv: false } };
 }
@@ -1223,15 +1420,15 @@ function fromAgenda(ev) {
 const AGENDA_TEMPLATE_KEYS = [
   ['Client', b => b.client.nom], ['Adresse client', b => b.client.adresse], ['Chantier', b => b.chantier.nom], ['N° chantier', b => b.chantier.numero],
   ['N° commande', b => b.chantier.commande], ['Chef de chantier', b => b.chef.nom], ['Tél chef', b => b.chef.tel], ['Email chef', b => b.chef.email],
-  ['Ville chantier', b => b.chantier.ville], ['Adresse chantier', b => b.chantier.adresse], ['Matériel', b => matById(b.materiel.type)?.label || ''],
-  ['Immatriculation', b => b.materiel.immat], ['N° remorque', b => b.materiel.remorque], ['Conducteur', b => b.materiel.conducteur],
-  ['Facturation', b => [factLabel(b.facturation.mode), b.facturation.nuit && 'Nuit', b.facturation.continu && 'En continu'].filter(Boolean).join(' + ')],
-  ['Départ', b => b.trajets[0]?.depart || ''], ['Arrivée', b => b.trajets[0]?.arrivee || ''],
-  ['Matériaux', b => b.materiaux.map(m => m.nom).join(' ; ')], ['Observations', b => b.observations],
+  ['Ville chantier', b => b.chantier.ville], ['Adresse chantier', b => b.chantier.adresse], ['Matériel', b => matById(b.engins[0].type)?.label || ''],
+  ['Immatriculation', b => b.engins[0].immat], ['N° remorque', b => b.engins[0].remorque], ['Conducteur', b => b.engins[0].conducteur],
+  ['Facturation', b => { const f = b.engins[0].facturation; return [factLabel(f.mode), f.nuit && 'Nuit', f.continu && 'En continu'].filter(Boolean).join(' + '); }],
+  ['Départ', b => b.engins[0].trajets[0]?.depart || ''], ['Arrivée', b => b.engins[0].trajets[0]?.arrivee || ''],
+  ['Matériaux', b => b.engins[0].materiaux.map(m => m.nom).join(' ; ')], ['Observations', b => b.observations],
 ];
 const agendaDescription = (bl = newBL()) => AGENDA_TEMPLATE_KEYS.map(([k, f]) => `${k} : ${f(bl) || ''}`).join('\n');
 function gcalLink(bl) {
-  const m = matById(bl?.materiel?.type);
+  const m = matById(bl?.engins?.[0]?.type);
   const titre = bl ? `BL · ${m?.label || 'Matériel'} · ${bl.chantier.ville || bl.chantier.nom || bl.client.nom || 'Chantier'}` : 'BL · Matériel · Ville';
   const q = new URLSearchParams({ action: 'TEMPLATE', text: titre, details: agendaDescription(bl || undefined), location: bl?.chantier?.adresse || '' });
   return `https://calendar.google.com/calendar/render?${q}`;
@@ -1241,7 +1438,6 @@ function gcalLink(bl) {
 function validate(bl, scope) {
   const errors = [], warnings = [];
   const all = scope === 'all', on = k => all || scope === k;
-  const m = matById(bl.materiel.type), cat = m?.cat;
   if (on('chantier')) {
     if (!bl.date) errors.push(['date', 'Indiquez la date du bon', 'chantier']);
     if (!bl.client.nom.trim()) errors.push(['client.nom', 'Le client est obligatoire', 'chantier']);
@@ -1252,32 +1448,43 @@ function validate(bl, scope) {
     if (!bl.chantier.commande.trim()) warnings.push(['chantier.commande', 'N° de commande non renseigné.', 'chantier']);
   }
   if (on('materiel')) {
-    if (!m) errors.push(['materiel.type', 'Choisissez un véhicule ou un engin', 'materiel']);
-    if (cat === 'autre' && !bl.materiel.libreDesignation.trim()) errors.push(['materiel.libreDesignation', 'Précisez la désignation', 'materiel']);
-    if (m && !bl.materiel.conducteur.trim()) errors.push(['materiel.conducteur', 'Indiquez le conducteur', 'materiel']);
-    if (cat === 'camion' && !bl.materiel.immat.trim()) errors.push(['materiel.immat', 'L\'immatriculation du camion est obligatoire', 'materiel']);
-    if (m?.remorque && !bl.materiel.remorque.trim()) warnings.push(['materiel.remorque', 'N° de remorque non renseigné.', 'materiel']);
+    if (!bl.engins.some(x => matById(x.type))) errors.push(['engins.0.type', 'Choisissez un véhicule ou un engin', 'materiel']);
+    bl.engins.forEach((e, i) => {
+      const me = matById(e.type), ce = catOf(e), nom = designationEngin(e) || `Engin ${i + 1}`;
+      if (!me) return;
+      if (ce === 'autre' && !e.libreDesignation.trim()) errors.push([`engins.${i}.libreDesignation`, 'Précisez la désignation', 'materiel']);
+      if (!e.conducteur.trim()) errors.push([`engins.${i}.conducteur`, `Indiquez le conducteur (${nom})`, 'materiel']);
+      if (ce === 'camion' && !e.immat.trim()) errors.push([`engins.${i}.immat`, `L'immatriculation est obligatoire (${nom})`, 'materiel']);
+      if (me.remorque && !e.remorque.trim()) warnings.push([`engins.${i}.remorque`, `N° de remorque non renseigné (${nom}).`, 'materiel']);
+    });
   }
-  if (on('prestation') && m) {
-    if (cat === 'camion' || cat === 'transfert') {
-      bl.trajets.forEach((t, i) => {
-        if (t.depart.trim() && !t.arrivee.trim()) errors.push([`trajets.${i}.arrivee`, 'Indiquez où va le camion', 'prestation']);
-        if (!t.depart.trim() && t.arrivee.trim()) errors.push([`trajets.${i}.depart`, 'Indiquez d\'où part le camion', 'prestation']);
-      });
-      if (!bl.trajets.some(t => t.depart.trim() && t.arrivee.trim())) warnings.push(['', 'Aucun trajet renseigné.', 'prestation']);
-    }
-    if (cat === 'camion' && ['tonnes', 'm3'].includes(bl.facturation.mode) && !totalMateriaux(bl)) warnings.push(['', `Facturation ${factLabel(bl.facturation.mode).toLowerCase()} : aucune quantité de matériaux saisie.`, 'prestation']);
+  if (on('prestation')) {
+    enginsRemplis(bl).forEach(e => {
+      const i = bl.engins.indexOf(e), ce = catOf(e), nom = designationEngin(e);
+      if (ce === 'camion' || ce === 'transfert') {
+        e.trajets.forEach((t, j) => {
+          if (t.depart.trim() && !t.arrivee.trim()) errors.push([`engins.${i}.trajets.${j}.arrivee`, 'Indiquez où va le camion', 'prestation']);
+          if (!t.depart.trim() && t.arrivee.trim()) errors.push([`engins.${i}.trajets.${j}.depart`, 'Indiquez d\'où part le camion', 'prestation']);
+        });
+        if (!e.trajets.some(t => t.depart.trim() && t.arrivee.trim())) warnings.push(['', `Aucun trajet renseigné (${nom}).`, 'prestation']);
+      }
+      if (ce === 'camion' && ['tonnes', 'm3'].includes(e.facturation.mode) && !materiauxEngin(e)) warnings.push(['', `Facturation ${factLabel(e.facturation.mode).toLowerCase()} : aucune quantité saisie (${nom}).`, 'prestation']);
+    });
   }
   if (on('heures')) {
-    const h = bl.horaires;
-    const pairs = bl.facturation.continu ? [['matinArr', 'matinDep']] : [['matinArr', 'matinDep'], ['amArr', 'amDep']];
-    pairs.forEach(([a, b]) => {
-      if (h[a] && !h[b]) errors.push([`horaires.${b}`, 'Heure de départ manquante', 'heures']);
-      if (!h[a] && h[b]) errors.push([`horaires.${a}`, 'Heure d\'arrivée manquante', 'heures']);
+    enginsRemplis(bl).forEach(e => {
+      const i = bl.engins.indexOf(e), h = e.horaires, nom = designationEngin(e);
+      // propre à CET engin : un oubli sur le premier ne doit pas masquer l'erreur du second
+      let manque = false;
+      const pairs = e.facturation.continu ? [['matinArr', 'matinDep']] : [['matinArr', 'matinDep'], ['amArr', 'amDep']];
+      pairs.forEach(([a, b]) => {
+        if (h[a] && !h[b]) { errors.push([`engins.${i}.horaires.${b}`, 'Heure de départ manquante', 'heures']); manque = true; }
+        if (!h[a] && h[b]) { errors.push([`engins.${i}.horaires.${a}`, 'Heure d\'arrivée manquante', 'heures']); manque = true; }
+      });
+      if (e.facturation.mode === 'heure' && !minutesEngin(e) && !manque) errors.push([`engins.${i}.horaires.matinArr`, `Facturation à l'heure : saisissez les horaires (${nom})`, 'heures']);
+      if (!e.facturation.continu && h.matinDep && h.amArr && toMin(h.amArr) < toMin(h.matinDep)) warnings.push(['', `L'après-midi commence avant la fin du matin (${nom}).`, 'heures']);
+      if (minutesEngin(e) > 14 * 60) warnings.push(['', `${nom} : journée de ${fmtH(minutesEngin(e))}, vérifiez les horaires.`, 'heures']);
     });
-    if (bl.facturation.mode === 'heure' && !minutesTotal(bl) && !errors.some(e => e[2] === 'heures')) errors.push(['horaires.matinArr', 'Facturation à l\'heure : saisissez les horaires', 'heures']);
-    if (!bl.facturation.continu && h.matinDep && h.amArr && toMin(h.amArr) < toMin(h.matinDep)) warnings.push(['', 'L\'après-midi commence avant la fin du matin.', 'heures']);
-    if (minutesTotal(bl) > 14 * 60) warnings.push(['', `Journée de ${fmtH(minutesTotal(bl))} : vérifiez les horaires.`, 'heures']);
   }
   if (scope === 'signature' || all) {
     if (!bl.signature.nom.trim()) errors.push(['signature.nom', 'Nom du signataire obligatoire', 'signature']);
@@ -1395,7 +1602,8 @@ function openPdfModal(src, title = 'Aperçu du PDF', downloadHref = '') {
 const T_LABELS = { matinArr: 'Arrivée chantier', matinDep: 'Départ chantier', amArr: 'Arrivée chantier', amDep: 'Départ chantier' };
 function openTimeSheet(path, onSet) {
   const key = path.split('.').pop();
-  const period = state.bl.facturation.continu ? 'Journée' : (key.startsWith('matin') ? 'Matin' : 'Après-midi');
+  const engin = getPath(state.bl, path.split('.').slice(0, 2).join('.'));   // engins.<i>
+  const period = engin?.facturation?.continu ? 'Journée' : (key.startsWith('matin') ? 'Matin' : 'Après-midi');
   const cur = getPath(state.bl, path) || DEFAULT_T[key];
   let h = Math.floor(toMin(cur) / 60), m = roundQ(toMin(cur) % 60) % 60;
   const hours = Array.from({ length: 24 }, (_, i) => `<button type="button" data-h="${i}" class="${i >= 5 && i <= 20 ? 'work' : ''}" aria-pressed="${i === h}">${pad2(i)}</button>`).join('');
@@ -1509,6 +1717,88 @@ function signaturePad(wrap, { onChange, initial } = {}) {
   return api_;
 }
 
+/* ------------------------------------------------------ carte du chantier --
+   Une mosaïque de tuiles OpenStreetMap, sans bibliothèque ni compte. Elle
+   arrive en fondu, légèrement zoomée et voilée, puis se pose : le chauffeur
+   voit tout de suite où il va. « Y aller » passe la main au GPS du téléphone
+   (Plans sur iPhone, Maps sur Android).                                     */
+const TUILE = 256, ZOOM_CARTE = 16;
+const lonEnTuile = (lon, z) => (lon + 180) / 360 * 2 ** z;
+const latEnTuile = (lat, z) => (1 - Math.log(Math.tan(lat * Math.PI / 180) + 1 / Math.cos(lat * Math.PI / 180)) / Math.PI) / 2 * 2 ** z;
+
+function carteHtml(pt) {
+  const z = ZOOM_CARTE;
+  const tx = lonEnTuile(pt.lon, z), ty = latEnTuile(pt.lat, z);
+  const x0 = Math.floor(tx) - 1, y0 = Math.floor(ty) - 1;
+  const dx = (tx - x0) * TUILE, dy = (ty - y0) * TUILE;   // position du point dans la mosaïque
+  const n = 2 ** z, mod = v => ((v % n) + n) % n;
+  const tuiles = [];
+  for (let j = 0; j < 3; j++) for (let i = 0; i < 3; i++) {
+    const X = mod(x0 + i), Y = y0 + j;
+    tuiles.push(Y < 0 || Y >= n ? `<span class="tuile vide" style="left:${i * TUILE}px;top:${j * TUILE}px"></span>`
+      : `<img class="tuile" src="https://tile.openstreetmap.org/${z}/${X}/${Y}.png" alt="" loading="eager" decoding="async" style="left:${i * TUILE}px;top:${j * TUILE}px">`);
+  }
+  const q = encodeURIComponent(pt.label);
+  return `<figure class="carte" aria-label="Carte du chantier : ${esc(pt.label)}">
+    <div class="carte-vue"><div class="carte-mosaique" style="margin-left:${-dx}px;margin-top:${-dy}px">${tuiles.join('')}</div>
+      <span class="carte-pin">${icon('pin')}</span><span class="carte-onde" aria-hidden="true"></span></div>
+    <figcaption class="carte-pied">
+      <span class="carte-lieu">${icon('pin')}<span>${esc(pt.label)}</span></span>
+      <button type="button" class="btn btn-dark btn-sm" data-act="gps" data-lat="${pt.lat}" data-lon="${pt.lon}" data-label="${esc(pt.label)}">${icon('route')}Y aller</button>
+    </figcaption>
+    <span class="carte-credit">© OpenStreetMap</span>
+  </figure>`;
+}
+
+/* Appelé à chaque frappe dans l'adresse : on attend que le chauffeur ait fini
+   d'écrire avant d'interroger quoi que ce soit. */
+let carteTimer = null, carteDerniere = null;
+function majCarte({ aussitot = false } = {}) {
+  const hote = $('#carte-chantier'); if (!hote || !state.bl) return;
+  const adresse = adresseChantier(state.bl);
+  if (norm(adresse) === norm(carteDerniere || '') && hote.childElementCount) return;
+  clearTimeout(carteTimer);
+  if (!adresse) { carteDerniere = ''; hote.innerHTML = ''; return; }
+  carteTimer = setTimeout(async () => {
+    const pt = await geocoder(adresse);
+    const encore = $('#carte-chantier');
+    if (!encore || norm(adresseChantier(state.bl)) !== norm(adresse)) return;   // l'adresse a changé entre-temps
+    carteDerniere = adresse;
+    if (!pt) { encore.innerHTML = ''; return; }
+    encore.innerHTML = carteHtml(pt);
+    requestAnimationFrame(() => encore.querySelector('.carte')?.classList.add('posee'));
+  }, aussitot ? 60 : 850);
+}
+
+/* ------------------------------------------------------------ choix du GPS --
+   « Y aller » n'impose pas d'application : le chauffeur prend celle qu'il a
+   l'habitude d'utiliser. On passe les coordonnées plutôt que l'adresse en
+   toutes lettres : aucune erreur d'interprétation possible à l'arrivée.    */
+const estIOS = () => /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+
+function ouvrirGps(lat, lon, label) {
+  const ll = `${lat},${lon}`, enc = encodeURIComponent(ll), q = encodeURIComponent(label);
+  const ios = estIOS();
+  const apps = [
+    ios && { nom: 'Plans', ini: 'P', couleur: '#1A84FF', url: `maps://?daddr=${enc}&dirflg=d` },
+    { nom: 'Google Maps', ini: 'G', couleur: '#1A73E8', url: `https://www.google.com/maps/dir/?api=1&destination=${enc}` },
+    { nom: 'Waze', ini: 'W', couleur: '#05C8F7', url: `https://www.waze.com/ul?ll=${enc}&navigate=yes` },
+    !ios && { nom: 'Autre application', ini: '…', couleur: '#6B6660', url: `geo:${ll}?q=${enc}(${q})`, aide: 'Le téléphone propose ses applications' },
+  ].filter(Boolean);
+  const root = openModal(`
+    <div class="modal-h"><div><p class="eyebrow">Aller au chantier</p><h2>Ouvrir avec</h2></div>
+      <button class="icon-btn sm" data-close aria-label="Fermer">${icon('x')}</button></div>
+    <p class="gps-adresse">${icon('pin')}<span>${esc(label)}</span></p>
+    <div class="gps-liste">
+      ${apps.map(a => `<a class="gps-choix" href="${a.url}" target="_blank" rel="noopener" data-close>
+        <span class="gps-ic" style="background:${a.couleur}">${a.ini}</span>
+        <span class="gps-txt"><b>${a.nom}</b>${a.aide ? `<span>${a.aide}</span>` : ''}</span>${icon('arrowR')}</a>`).join('')}
+      <button type="button" class="gps-choix" data-act="copier-adresse" data-label="${esc(label)}">
+        <span class="gps-ic gps-ic-pale">${icon('copy')}</span><span class="gps-txt"><b>Copier l'adresse</b></span></button>
+    </div>`);
+  return root;
+}
+
 /* ---------------------------------------------------------- squelettes -- */
 const skeletonRows = n => Array.from({ length: n }, () => '<div class="sk sk-row"></div>').join('');
 const emptyState = (title, text, illName = 'autre', action = '') => `<div class="empty-state"><div class="ill-wrap">${ill({ ill: illName })}</div><h3>${esc(title)}</h3><p>${esc(text)}</p>${action ? `<div style="margin-top:14px">${action}</div>` : ''}</div>`;
@@ -1573,8 +1863,11 @@ const Session = {
 const SB = {
   base: () => String(CFG.supabaseUrl || '').replace(/\/+$/, ''),
   async jeton(grant, body) {
-    const r = await fetch(`${SB.base()}/auth/v1/token?grant_type=${grant}`, {
-      method: 'POST', headers: { apikey: CFG.supabaseKey, 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+    let r;
+    try {
+      r = await fetchDelai(`${SB.base()}/auth/v1/token?grant_type=${grant}`, {
+        method: 'POST', headers: { apikey: CFG.supabaseKey, 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+    } catch { return null; }
     return r.ok ? r.json() : null;
   },
   garderJeton(j) {
@@ -1590,8 +1883,8 @@ const SB = {
     if (!rejoue && Session.data?.expire && Date.now() > Session.data.expire - 60_000) await SB.renouveler();
     let r;
     try {
-      r = await fetch(url, { ...opt, headers: { apikey: CFG.supabaseKey, Authorization: `Bearer ${(!ANON && Session.data?.accessToken) || CFG.supabaseKey}`, ...(opt.headers || {}) } });
-    } catch { setOnline(false); throw new Error('Pas de réseau pour le moment'); }
+      r = await fetchDelai(url, { ...opt, headers: { apikey: CFG.supabaseKey, Authorization: `Bearer ${(!ANON && Session.data?.accessToken) || CFG.supabaseKey}`, ...(opt.headers || {}) } });
+    } catch (e) { setOnline(false); throw new Error(messageReseau(e)); }
     setOnline(true);
     if (r.status === 401 && !ANON && !rejoue && await SB.renouveler()) return SB.req(url, opt, true);
     if (r.status === 401 && ANON) { console.warn('[HK] 401 : politiques SQL du script 32 absentes ou incomplètes'); throw new Error('Le service est indisponible pour le moment. Prévenez le bureau.'); }
@@ -1698,14 +1991,17 @@ function viewLogin(message = '') {
 /* -------------------------------------------- conversion app <-> base -- */
 const estUuid = s => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(s || '');
 const COLS = 'id,numero,statut,date,maj_le,signe_le,client,chantier,num_chantier,num_commande,chef,chef_email,materiel,designation,immat,conducteur,minutes,facturation,mail,agenda_uid';
+// Colonnes « à plat » du registre : le premier engin sert de repère, les
+// autres sont listés dans « designation ». Le bon complet est dans « donnees ».
 function versLigne(bl) {
   const { id, numero, statut, pdf, mail, creeLe, majLe, ...donnees } = bl;
+  const engins = enginsRemplis(bl), joint = f => engins.map(f).filter(Boolean).join(' · ');
   return {
     date: bl.date, client: bl.client.nom || '', chantier: bl.chantier.nom || bl.chantier.ville || '',
     num_chantier: bl.chantier.numero || '', num_commande: bl.chantier.commande || '',
-    chef: bl.chef.nom || '', chef_email: bl.chef.email || '', materiel: bl.materiel.type || '',
-    designation: designationPrincipale(bl) || '', immat: bl.materiel.immat || '', conducteur: bl.materiel.conducteur || '',
-    facturation: bl.facturation.mode || '', minutes: minutesTotal(bl), quantite: totalMateriaux(bl) || null,
+    chef: bl.chef.nom || '', chef_email: bl.chef.email || '', materiel: engins[0]?.type || '',
+    designation: designationPrincipale(bl) || '', immat: joint(e => e.immat), conducteur: joint(e => e.conducteur),
+    facturation: engins[0]?.facturation?.mode || '', minutes: minutesTotal(bl), quantite: totalMateriaux(bl) || null,
     agenda_uid: bl.source?.agendaUid || null, donnees,
   };
 }
@@ -1727,6 +2023,7 @@ function contenuMail(bl) {
   const E = CFG.entreprise || {}, mins = minutesTotal(bl);
   const chantier = bl.chantier.nom || bl.chantier.ville || '';
   const subject = `Bon de location N° ${bl.numero} — ${chantier || bl.client.nom || E.nom} — ${frDate(bl.date)}`;
+  const engins = enginsRemplis(bl);
   const ligne = (k, v) => v ? `<tr><td style="padding:9px 0;color:#716C64;font-size:13px;width:44%;border-bottom:1px solid #ECE7DE">${esc(k)}</td><td style="padding:9px 0;color:#17181B;font-size:14px;font-weight:600;border-bottom:1px solid #ECE7DE">${esc(v)}</td></tr>` : '';
   const html = `<!doctype html><html lang="fr"><body style="margin:0;background:#F4F2ED;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#F4F2ED;padding:28px 12px"><tr><td align="center">
@@ -1736,7 +2033,7 @@ function contenuMail(bl) {
 <div style="font-size:30px;font-weight:800;color:#17181B;margin:6px 0 2px">N° ${esc(bl.numero)}</div>
 <div style="font-size:14px;color:#42444A">Bonjour${bl.chef.nom ? ' ' + esc(bl.chef.nom) : ''}, vous trouverez ci-joint le bon de location signé sur le chantier.</div></td></tr>
 <tr><td style="padding:12px 28px 4px"><table role="presentation" width="100%" cellpadding="0" cellspacing="0">
-${ligne('Date', frDate(bl.date))}${ligne('Client', bl.client.nom)}${ligne('Chantier', chantier)}${ligne('N° chantier', bl.chantier.numero)}${ligne('N° commande', bl.chantier.commande)}${ligne('Matériel', designationPrincipale(bl))}${ligne('Heures', mins ? fmtH(mins) : '')}${ligne('Signé par', bl.signature?.nom)}
+${ligne('Date', frDate(bl.date))}${ligne('Client', bl.client.nom)}${ligne('Chantier', chantier)}${ligne('N° chantier', bl.chantier.numero)}${ligne('N° commande', bl.chantier.commande)}${engins.map(e => ligne(engins.length > 1 ? designationEngin(e) : 'Matériel', engins.length > 1 ? [e.conducteur, minutesEngin(e) ? fmtH(minutesEngin(e)) : ''].filter(Boolean).join(' · ') : designationEngin(e))).join('')}${ligne(engins.length > 1 ? 'Total des heures' : 'Heures', mins ? fmtH(mins) : '')}${ligne('Signé par', bl.signature?.nom)}
 </table></td></tr>
 <tr><td style="padding:18px 28px 28px"><div style="background:#FFF1E6;border-radius:12px;padding:14px 16px;font-size:13px;color:#B24700">PDF joint : <b>BL-${esc(bl.numero)}.pdf</b></div></td></tr>
 <tr><td style="padding:16px 28px;background:#FBFAF7;border-top:1px solid #ECE7DE;font-size:12px;color:#716C64">${esc(E.nom)} · ${esc(E.adresse)}, ${esc(E.cpVille)} · ${esc(E.tel)} · ${esc(E.email)}</td></tr>
@@ -1745,14 +2042,18 @@ ${ligne('Date', frDate(bl.date))}${ligne('Client', bl.client.nom)}${ligne('Chant
 }
 
 // Une ligne par bon pour le classeur Google Sheets (colonnes dans cet ordre)
-const ligneSheets = (bl, chemin) => ({
-  numero: bl.numero, date: frDate(bl.date), client: bl.client.nom, chantier: bl.chantier.nom || bl.chantier.ville,
-  num_chantier: bl.chantier.numero, num_commande: bl.chantier.commande, chef: bl.chef.nom, chef_email: bl.chef.email,
-  materiel: designationPrincipale(bl), immat: bl.materiel.immat, remorque: bl.materiel.remorque, conducteur: bl.materiel.conducteur,
-  facturation: factLabel(bl.facturation.mode), heures: fmtDec(minutesTotal(bl)), quantite: totalMateriaux(bl) ? fmtNum(totalMateriaux(bl)) : '',
-  unite: totalMateriaux(bl) ? unitMat(bl) : '', tours: totalTours(bl) || '', signe_par: bl.signature?.nom, signe_le: frDateTime(bl.signature?.date),
-  saisi_par: Session.employe?.nom || bl.materiel.conducteur || '', fichier: chemin,
-});
+const ligneSheets = (bl, chemin) => {
+  const engins = enginsRemplis(bl), joint = f => engins.map(f).filter(Boolean).join(' · ');
+  return {
+    numero: bl.numero, date: frDate(bl.date), client: bl.client.nom, chantier: bl.chantier.nom || bl.chantier.ville,
+    num_chantier: bl.chantier.numero, num_commande: bl.chantier.commande, chef: bl.chef.nom, chef_email: bl.chef.email,
+    materiel: designationPrincipale(bl), immat: joint(e => e.immat), remorque: joint(e => e.remorque), conducteur: joint(e => e.conducteur),
+    facturation: joint(e => factLabel(e.facturation.mode)), heures: fmtDec(minutesTotal(bl)),
+    quantite: totalMateriaux(bl) ? fmtNum(totalMateriaux(bl)) : '', unite: totalMateriaux(bl) ? unitMat(engins[0]) : '',
+    tours: totalTours(bl) || '', signe_par: bl.signature?.nom, signe_le: frDateTime(bl.signature?.date),
+    saisi_par: Session.employe?.nom || joint(e => e.conducteur) || '', fichier: chemin,
+  };
+};
 
 // Le PDF voyage dans le message (« pdfBase64 ») : Make n'a pas besoin d'aller
 // le rechercher, et l'app des chauffeurs n'a aucun droit de lecture à donner.
@@ -1766,9 +2067,10 @@ async function envoyerAuChef(id, bl, chemin, destinataire, pdfBase64) {
   else {
     try {
       const { subject, html } = contenuMail(bl);
-      const r = await fetch(CFG.makeWebhookUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' },
+      // le PDF voyage dans le message : laisser le temps à un réseau de chantier
+      const r = await fetchDelai(CFG.makeWebhookUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ jeton: CFG.makeJeton || '', to: destinataire, cc: CFG.copieBureau || '', subject, html,
-          pdfName: `BL-${bl.numero}.pdf`, pdfBase64, bon: ligneSheets(bl, chemin) }) });
+          pdfName: `BL-${bl.numero}.pdf`, pdfBase64, bon: ligneSheets(bl, chemin) }) }, 60000);
       if (!r.ok) console.warn(`[HK] webhook d'envoi : réponse ${r.status}`);
       mail = r.ok ? { statut: 'envoye', mode: 'auto', to: destinataire, subject, le } : { statut: 'erreur', to: destinataire, le };
     } catch (e) { console.warn('[HK] webhook d\'envoi injoignable :', e.message); mail = { statut: 'erreur', to: destinataire, le }; }
@@ -1796,7 +2098,8 @@ async function apiSupabase(method, chemin, body) {
       SB.rest(`agenda_bl?select=*&date=gte.${du}&date=lte.${au}&order=date,debut.nullsfirst`),
       ANON ? [] : SB.rest(`bons_location?select=${COLS}&agenda_uid=not.is.null&date=gte.${du}&date=lte.${au}`),
     ]);
-    const parEvt = Object.fromEntries(lies.map(r => [`${r.agenda_uid}|${r.date}`, versResume(r)]));
+    // Le lien des chauffeurs ne lit pas la base : il se souvient de ce qu'il a fait sur ce téléphone.
+    const parEvt = ANON ? bonsLocauxParEvenement() : Object.fromEntries(lies.map(r => [`${r.agenda_uid}|${r.date}`, versResume(r)]));
     return { source: 'google', events: evs.map(e => ({ uid: e.uid, titre: e.titre, lieu: e.lieu, description: e.description, date: e.date,
       debut: e.debut ? e.debut.slice(0, 5) : '', fin: e.fin ? e.fin.slice(0, 5) : '', journee: e.journee, bon: parEvt[`${e.uid}|${e.date}`] || null })) };
   }
@@ -1941,7 +2244,9 @@ const buildPdf = (() => {
     const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4', compress: true });
     const E = state.config?.entreprise || { nom: 'HK Terrassement', adresse: '3 rue des Roseaux', cpVille: '68580 UEBERSTRASS', tel: '06 42 76 96 88', email: 'contact@hkterrassement.fr' };
     const D = state.config?.document || { titre: 'BON DE LOCATION', mentions: [] };
-    const m = matById(bl.materiel.type), cat = m?.cat, f = bl.facturation, h = bl.horaires;
+    const engins = enginsRemplis(bl), seul = engins.length === 1;
+    const e0 = engins[0] || newEngin();
+    const m = matById(e0.type), cat = m?.cat, f = e0.facturation, h = e0.horaires;
     const rows = lignesBL(bl);
     const ref = String(bl.id).replace(/-/g, '').slice(0, 8).toUpperCase();
 
@@ -2038,18 +2343,29 @@ const buildPdf = (() => {
     sect('Types de camions & engins', 13, 47.3);
     MATERIEL.forEach((item, i) => {
       const col = i % 4, rowI = Math.floor(i / 4);
+      const pris = engins.find(e => e.type === item.id);
       let label = item.label;
-      if (item.id === bl.materiel.type && item.cat === 'autre' && bl.materiel.libreDesignation) label = `Autre : ${bl.materiel.libreDesignation}`;
-      if (item.id === bl.materiel.type && item.cat === 'transfert') label = `Transfert (${f.mode === 'forfait' ? 'forfait' : 'heure'})`;
-      radio(13 + col * 43.5, 53.8 + rowI * 5.6, item.id === bl.materiel.type, label, 43.5);
+      if (pris && item.cat === 'autre' && pris.libreDesignation) label = `Autre : ${pris.libreDesignation}`;
+      if (pris && item.cat === 'transfert') label = `Transfert (${pris.facturation.mode === 'forfait' ? 'forfait' : 'heure'})`;
+      radio(13 + col * 43.5, 53.8 + rowI * 5.6, !!pris, label, 43.5);
     });
 
     box(190, 42, 97, 33);
-    sect('Matériel & conducteur', 193, 47.3);
-    lv(cat === 'pelle' ? 'N° engin / immat :' : 'N° immat camion :', bl.materiel.immat, 193, 53.8, 91, { bold: true, size: 9.2 });
-    lv('N° remorque :', m?.remorque ? bl.materiel.remorque : (bl.materiel.remorque || ''), 193, 59.4, 91, { bold: true });
-    lv('Conducteur :', bl.materiel.conducteur, 193, 65, 91);
-    lv('Tél. conducteur :', bl.materiel.telConducteur, 193, 70.6, 91);
+    sect(seul ? 'Matériel & conducteur' : `Engins & conducteurs (${engins.length})`, 193, 47.3);
+    if (seul) {
+      lv(cat === 'pelle' ? 'N° engin / immat :' : 'N° immat camion :', e0.immat, 193, 53.8, 91, { bold: true, size: 9.2 });
+      lv('N° remorque :', m?.remorque ? e0.remorque : (e0.remorque || ''), 193, 59.4, 91, { bold: true });
+      lv('Conducteur :', e0.conducteur, 193, 65, 91);
+      lv('Tél. conducteur :', e0.telConducteur, 193, 70.6, 91);
+    } else {
+      const pas = engins.length > 3 ? 4.6 : 5.6;
+      engins.slice(0, 4).forEach((e, i) => {
+        const yy = 53.6 + i * pas;
+        font('bold', 7.8); color(C.ink); T(fit(designationEngin(e), 42), 193, yy);
+        font('normal', 7.6); color(C.ink2); T(fit([e.conducteur, e.immat || e.remorque].filter(Boolean).join(' · '), 47), 237, yy);
+      });
+      if (engins.length > 4) { font('italic', 6.8); color(C.muted); T(`+ ${engins.length - 4} autre(s), voir le tableau`, 193, 73.5); }
+    }
 
     let y = drawTable(79, pageRows, FIRST);
 
@@ -2064,30 +2380,67 @@ const buildPdf = (() => {
     // Facturation + chantier
     box(10, by, 86, bh);
     sect('Facturation', 13, by + 5.3);
-    const factItems = [['heure', 'Heure'], ['tonnes', 'Tonnes'], ['m3', 'M³'], ['forfait', 'Forfait'], ['nuit', 'Nuit'], ['continu', 'En continu']];
-    factItems.forEach(([id, lab], i) => {
-      const on = id === 'nuit' ? f.nuit : id === 'continu' ? f.continu : f.mode === id;
-      radio(13 + (i % 3) * 27, by + 11.5 + Math.floor(i / 3) * 5.6, on, lab, 27);
-    });
-    doc.setDrawColor(...C.line1); doc.setLineWidth(.25); doc.line(13, by + 20.5, 93, by + 20.5);
-    lv('Ville chantier :', bl.chantier.ville || bl.chantier.nom, 13, by + 26.5, 80, { bold: true });
-    lv('Adresse chantier :', bl.chantier.adresse, 13, by + 32.2, 80);
+    if (seul) {
+      const factItems = [['heure', 'Heure'], ['tonnes', 'Tonnes'], ['m3', 'M³'], ['forfait', 'Forfait'], ['nuit', 'Nuit'], ['continu', 'En continu']];
+      factItems.forEach(([id, lab], i) => {
+        const on = id === 'nuit' ? f.nuit : id === 'continu' ? f.continu : f.mode === id;
+        radio(13 + (i % 3) * 27, by + 11.5 + Math.floor(i / 3) * 5.6, on, lab, 27);
+      });
+      doc.setDrawColor(...C.line1); doc.setLineWidth(.25); doc.line(13, by + 20.5, 93, by + 20.5);
+      lv('Ville chantier :', bl.chantier.ville || bl.chantier.nom, 13, by + 26.5, 80, { bold: true });
+      lv('Adresse chantier :', bl.chantier.adresse, 13, by + 32.2, 80);
+    } else {
+      // plusieurs engins : le chantier passe au-dessus du trait, la liste des
+      // facturations prend toute la place qui reste en dessous
+      lv('Ville chantier :', bl.chantier.ville || bl.chantier.nom, 13, by + 11.5, 80, { bold: true });
+      lv('Adresse chantier :', bl.chantier.adresse, 13, by + 17.2, 80);
+      doc.setDrawColor(...C.line1); doc.setLineWidth(.25); doc.line(13, by + 20.5, 93, by + 20.5);
+      const pasF = engins.length > 3 ? 3.9 : 4.4;
+      engins.slice(0, 4).forEach((e, i) => {
+        const yy = by + 26 + i * pasF;
+        font('bold', 7.4); color(C.ink); T(fit(designationEngin(e), 46), 13, yy);
+        font('normal', 7.4); color(C.accentInk);
+        T(fit([factLabel(e.facturation.mode), e.facturation.nuit && 'Nuit', e.facturation.continu && 'En continu'].filter(Boolean).join(' · '), 32), 93, yy, { align: 'right' });
+      });
+      if (engins.length > 4) { font('italic', 6.6); color(C.muted); T(`+ ${engins.length - 4} autre(s)`, 13, by + 26 + 4 * pasF); }
+    }
 
     // Horaires
     box(99, by, 86, bh);
     sect('Horaires', 102, by + 5.3);
-    font('bold', 6.2); color(C.muted); T('ARRIVÉE', 142, by + 10.8, { align: 'center', charSpace: .2 }); T('DÉPART', 168, by + 10.8, { align: 'center', charSpace: .2 });
     const hrow = (label, a, b, yy) => {
       font('bold', 7.8); color(C.ink2); T(label, 102, yy);
       font('bold', 10); color(a ? C.ink : C.line); T(a || '--:--', 142, yy, { align: 'center' }); color(b ? C.ink : C.line); T(b || '--:--', 168, yy, { align: 'center' });
     };
-    if (f.continu) { hrow('Journée continue', h.matinArr, h.matinDep, by + 16.4); }
-    else { hrow('Matin', h.matinArr, h.matinDep, by + 16.4); hrow('Après-midi', h.amArr, h.amDep, by + 22); }
-    doc.setDrawColor(...C.line1); doc.line(102, by + 25.5, 182, by + 25.5);
+    if (seul) {
+      font('bold', 6.2); color(C.muted); T('ARRIVÉE', 142, by + 10.8, { align: 'center', charSpace: .2 }); T('DÉPART', 168, by + 10.8, { align: 'center', charSpace: .2 });
+      if (f.continu) { hrow('Journée continue', h.matinArr, h.matinDep, by + 16.4); }
+      else { hrow('Matin', h.matinArr, h.matinDep, by + 16.4); hrow('Après-midi', h.amArr, h.amDep, by + 22); }
+    } else {
+      const pas = engins.length > 3 ? 6.8 : 8.4;
+      engins.slice(0, 4).forEach((e, i) => {
+        const yy = by + 12 + i * pas, he = e.horaires;
+        font('bold', 7.4); color(C.ink); T(fit(designationEngin(e), 52), 102, yy);
+        font('bold', 8.4); color(minutesEngin(e) ? C.accentInk : C.line); T(minutesEngin(e) ? fmtH(minutesEngin(e)) : '—', 182, yy, { align: 'right' });
+        font('normal', 7.2); color(C.ink2);
+        const t1 = `${he.matinArr || '--:--'} > ${he.matinDep || '--:--'}`;
+        T(e.facturation.continu ? `Continu  ${t1}` : `Matin  ${t1}`, 102, yy + 4);
+        if (!e.facturation.continu) T(`Après-midi  ${he.amArr || '--:--'} > ${he.amDep || '--:--'}`, 143, yy + 4);
+      });
+      if (engins.length > 4) { font('italic', 6.6); color(C.muted); T(`+ ${engins.length - 4} autre(s), voir le tableau`, 102, by + 12 + 4 * pas); }
+    }
     const mins = minutesTotal(bl);
-    font('bold', 6.9); color(C.muted); T('TOTAL DU JOUR', 102, by + 31, { charSpace: .3 });
-    font('normal', 7.5); color(C.ink2); T(mins ? `soit ${fmtDec(mins)} h` : '', 102, by + 34.6);
-    font('bold', 17); color(mins ? C.accent : C.line); T(mins ? fmtH(mins) : '— h —', 182, by + 33.8, { align: 'right' });
+    if (seul) {
+      doc.setDrawColor(...C.line1); doc.line(102, by + 25.5, 182, by + 25.5);
+      font('bold', 6.9); color(C.muted); T('TOTAL DU JOUR', 102, by + 31, { charSpace: .3 });
+      font('normal', 7.5); color(C.ink2); T(mins ? `soit ${fmtDec(mins)} h` : '', 102, by + 34.6);
+      font('bold', 17); color(mins ? C.accent : C.line); T(mins ? fmtH(mins) : '— h —', 182, by + 33.8, { align: 'right' });
+    } else {
+      // plusieurs engins : le total remonte sur la ligne du titre, la place
+      // du bas revenant aux blocs horaires de chaque engin
+      font('bold', 6.2); color(C.muted); T('TOTAL DU JOUR', 163, by + 5.3, { align: 'right', charSpace: .2 });
+      font('bold', 11.5); color(mins ? C.accent : C.line); T(mins ? fmtH(mins) : '— h —', 183, by + 5.9, { align: 'right' });
+    }
 
     // Signature
     box(188, by, 99, bh);
@@ -2319,17 +2672,22 @@ function renderEvents() {
 }
 
 function eventHtml(ev, i) {
-  const p = fromAgenda(ev);
-  const m = matById(p.materiel?.type);
+  const p = fromAgenda(ev), e0 = p.engins?.[0];
+  const m = matById(e0?.type);
   const lieu = [p.chantier?.nom, p.chantier?.ville].filter(Boolean).join(' · ') || ev.lieu;
   const bon = ev.bon;
-  const act = bon
-    ? `${statusBadge(bon)}<a class="btn btn-ghost btn-sm" href="#/bl/${bon.id}/${bon.statut === 'brouillon' ? 'chantier' : 'ok'}">${bon.statut === 'brouillon' ? 'Reprendre le bon' : `Bon N° ${esc(bon.numero)}`}${icon('arrowR')}</a>`
-    : `<a class="btn btn-dark btn-sm" href="#/nouveau?uid=${encodeURIComponent(ev.uid)}&date=${ev.date}">Préparer le bon${icon('arrowR')}</a>`;
+  // Un bon signé n'est plus sur le téléphone du chauffeur : on l'annonce sans lien.
+  const act = !bon
+    ? `<a class="btn btn-dark btn-sm" href="#/nouveau?uid=${encodeURIComponent(ev.uid)}&date=${ev.date}">Préparer le bon${icon('arrowR')}</a>`
+    : bon.statut === 'brouillon'
+      ? `${statusBadge(bon)}<a class="btn btn-ghost btn-sm" href="#/bl/${bon.id}/chantier">Reprendre le bon${icon('arrowR')}</a>`
+      : CHAUFFEUR
+        ? `${statusBadge(bon)}<span class="ev-fait">${icon('check')}Bon N° ${esc(bon.numero)} fait</span>`
+        : `${statusBadge(bon)}<a class="btn btn-ghost btn-sm" href="#/bl/${bon.id}/ok">Bon N° ${esc(bon.numero)}${icon('arrowR')}</a>`;
   return `<article class="event" style="animation-delay:${i * 40}ms">
     <div class="ev-time"><b>${ev.journee ? 'Jour' : esc(ev.debut)}</b>${ev.fin ? `<span>${esc(ev.fin)}</span>` : ''}</div>
     <div class="ev-body">
-      <div class="ev-tags">${m ? `<span class="tag tag-accent">${ill(m)}${esc(m.label)}</span>` : ''}${p.facturation?.mode && m ? `<span class="tag">${esc(factLabel(p.facturation.mode))}</span>` : ''}</div>
+      <div class="ev-tags">${m ? `<span class="tag tag-accent">${ill(m)}${esc(m.label)}</span>` : ''}${e0?.facturation?.mode && m ? `<span class="tag">${esc(factLabel(e0.facturation.mode))}</span>` : ''}</div>
       <h3>${esc(p.client?.nom || ev.titre)}</h3>
       ${lieu ? `<p class="ev-meta">${icon('pin')}<span>${esc(lieu)}</span></p>` : ''}
       ${p.chef?.nom ? `<p class="ev-meta">${icon('user')}<span>${esc(p.chef.nom)}${p.chantier?.numero ? ` · ${esc(p.chantier.numero)}` : ''}</span></p>` : ''}
@@ -2385,7 +2743,9 @@ function renderRegistre() {
        ${big ? `<button type="button" class="icon-btn sm" data-act="pdf-dl" data-url="${b.pdf.url}" data-name="BL-${esc(b.numero)}.pdf" aria-label="Télécharger le PDF">${icon('download')}</button>` : ''}` : ''}
        <a class="icon-btn sm" href="#/bl/${b.id}/ok" aria-label="Détail et envoi du mail" title="${esc(mailLabel(b.mail))}">${icon('mail')}</a>
        <a class="icon-btn sm" href="#/nouveau?dupliquer=${b.id}" aria-label="Dupliquer ce bon">${icon('copy')}</a>`;
-  const matCell = b => { const m = matById(b.materiel); return m ? `<div class="t-mat">${ill(m)}<div><div class="t-strong">${esc(m.cat === 'autre' ? (b.materielLibre || 'Autre') : m.label)}</div><div class="t-sub">${esc(b.immat || b.conducteur || '')}</div></div></div>` : '<span class="muted">—</span>'; };
+  // « +2 » quand le bon porte plusieurs engins (le détail est dans le PDF)
+  const enPlus = b => Math.max(0, String(b.designation || '').split(' + ').filter(Boolean).length - 1);
+  const matCell = b => { const m = matById(b.materiel), n = enPlus(b); return m ? `<div class="t-mat">${ill(m)}<div><div class="t-strong">${esc(m.cat === 'autre' ? (b.materielLibre || 'Autre') : m.label)}${n ? `<span class="t-plus" title="${esc(b.designation)}">+${n}</span>` : ''}</div><div class="t-sub">${esc(b.immat || b.conducteur || '')}</div></div></div>` : '<span class="muted">—</span>'; };
   $('#reg-list').innerHTML = `
     <div class="tbl-scroll"><table class="tbl">
       <thead><tr><th>N°</th><th>Date</th><th>Client · chantier</th><th>Matériel</th><th>Heures</th><th>Chef de chantier</th><th>Statut</th><th class="sr-only">Actions</th></tr></thead>
@@ -2401,7 +2761,7 @@ function renderRegistre() {
     </table></div>
     <div class="reg-cards">${list.map(b => `<article class="rcard">
       <div class="rc-top"><span class="t-num">${b.numero ? `N° ${esc(b.numero)}` : 'Brouillon'}</span><span class="muted">${esc(frDate(b.date))}</span>${statusBadge(b)}</div>
-      <div><p class="rc-t">${esc(b.client || 'Client à renseigner')}</p><p class="rc-s">${esc([matById(b.materiel)?.label, b.chantier].filter(Boolean).join(' · '))}</p></div>
+      <div><p class="rc-t">${esc(b.client || 'Client à renseigner')}</p><p class="rc-s">${esc([b.designation || matById(b.materiel)?.label, b.chantier].filter(Boolean).join(' · '))}</p></div>
       <div class="rc-h">${b.minutes ? fmtH(b.minutes) : ''}</div>
       <div class="rc-act">${actions(b, true)}</div></article>`).join('')}</div>`;
 }
@@ -2468,7 +2828,7 @@ async function viewReglages() {
    ============================================================================= */
 'use strict';
 
-const factLine = bl => [factLabel(bl.facturation.mode), bl.facturation.nuit && 'Nuit', bl.facturation.continu && 'En continu'].filter(Boolean).join(' · ');
+const factLine = e => [factLabel(e?.facturation?.mode), e?.facturation?.nuit && 'Nuit', e?.facturation?.continu && 'En continu'].filter(Boolean).join(' · ');
 const stepIndex = key => Math.max(0, STEPS.findIndex(s => s.key === key));
 
 function viewWizard(stepKey) {
@@ -2513,6 +2873,7 @@ function renderStep({ keepScroll = false } = {}) {
   if (key === 'signature') mountSignature();
   if (keepScroll) window.scrollTo(0, y);
   if (state.focus) { const el = document.getElementById(state.focus); state.focus = null; el?.focus({ preventScroll: false }); }
+  if (key === 'chantier') majCarte({ aussitot: true });
 }
 
 function datalists() {
@@ -2527,19 +2888,19 @@ function datalists() {
 
 function renderLive() {
   const el = $('#live'); if (!el) return;
-  const bl = state.bl, m = matById(bl.materiel.type), cat = m?.cat, mins = minutesTotal(bl);
+  const bl = state.bl, engins = enginsRemplis(bl), mins = minutesTotal(bl);
   const ok = s => !validate(bl, s).errors.length;
-  const checks = [['Chantier', ok('chantier')], ['Matériel', !!m && ok('materiel')], ['Prestation', !!m && ok('prestation')], ['Heures', ok('heures')], ['Récap', stepIndex(state.step) >= 4], ['Signature', !!(state.pad && !state.pad.isEmpty())]];
+  const checks = [['Chantier', ok('chantier')], ['Engins', !!engins.length && ok('materiel')], ['Prestation', !!engins.length && ok('prestation')], ['Heures', ok('heures')], ['Récap', stepIndex(state.step) >= 4], ['Signature', !!(state.pad && !state.pad.isEmpty())]];
+  const ligne = e => `<div class="l-eng">${ill(matById(e.type))}<div><b>${esc(designationEngin(e))}</b><span>${esc([e.conducteur, factLine(e)].filter(Boolean).join(' · '))}</span></div><em>${minutesEngin(e) ? fmtH(minutesEngin(e)) : '—'}</em></div>`;
   el.innerHTML = `<div class="live">
     <div class="l-top"><span class="eyebrow">Aperçu du bon</span><span class="l-num">${bl.numero ? `N° ${esc(bl.numero)}` : 'N° à la signature'}</span></div>
     <p class="l-client">${esc(bl.client.nom || 'Client à renseigner')}</p>
     <p class="l-sub">${esc([bl.chantier.nom, bl.chantier.ville].filter(Boolean).join(' · ') || 'Chantier')} · ${esc(frDate(bl.date))}</p>
-    ${m ? `<div class="l-ill">${ill(m)}</div><p class="l-mat">${esc(designationPrincipale(bl))}</p>` : ''}
+    ${engins.length ? `<div class="l-engins">${engins.map(ligne).join('')}</div>` : ''}
     <div class="l-rows">
       <div class="l-row"><span>Chef de chantier</span><b>${esc(bl.chef.nom || '—')}</b></div>
-      ${m ? `<div class="l-row"><span>Facturation</span><b>${esc(factLine(bl))}</b></div>` : ''}
-      ${cat === 'camion' || cat === 'transfert' ? `<div class="l-row"><span>Trajets</span><b>${bl.trajets.filter(t => t.depart && t.arrivee).length} · ${totalTours(bl)} tour(s)</b></div>` : ''}
-      ${cat === 'camion' ? `<div class="l-row"><span>Matériaux</span><b>${totalMateriaux(bl) ? `${fmtNum(totalMateriaux(bl))} ${unitMat(bl)}` : `${bl.materiaux.length} coché(s)`}</b></div>` : ''}
+      ${totalTours(bl) ? `<div class="l-row"><span>Trajets</span><b>${totalTours(bl)} tour(s)</b></div>` : ''}
+      ${totalMateriaux(bl) ? `<div class="l-row"><span>Matériaux</span><b>${fmtNum(totalMateriaux(bl))} ${unitMat(engins[0])}</b></div>` : ''}
     </div>
     <div class="l-total"><span>Total du jour</span><b>${fmtH(mins)}</b></div>
     <div class="l-checks">${checks.map(([l, v]) => `<span class="l-check${v ? ' ok' : ''}">${icon(v ? 'check' : 'clock')}${l}</span>`).join('')}</div>
@@ -2550,10 +2911,12 @@ function refreshLive() {
   const bl = state.bl; if (!bl) return;
   renderLive();
   const set = (k, v) => { const el = $(`[data-live="${k}"]`); if (el) el.textContent = v; };
-  const t = totalTours(bl), u = unitMat(bl);
-  set('tours', `${t} tour${t > 1 ? 's' : ''}`);
-  set('mat-total', `${fmtNum(totalMateriaux(bl))} ${u}`);
-  bl.materiaux.forEach((mt, k) => set(`mat-${k}`, `${fmtNum(mt.pesees.reduce((a, p) => a + num(p.poids), 0))} ${u}`));
+  bl.engins.forEach((e, i) => {
+    const t = toursEngin(e), u = unitMat(e);
+    set(`tours-${i}`, `${t} tour${t > 1 ? 's' : ''}`);
+    set(`mat-total-${i}`, `${fmtNum(materiauxEngin(e))} ${u}`);
+    e.materiaux.forEach((mt, k) => set(`mat-${i}-${k}`, `${fmtNum(mt.pesees.reduce((a, p) => a + num(p.poids), 0))} ${u}`));
+  });
   const ab = $('.ab-info b'); if (ab) ab.textContent = fmtH(minutesTotal(bl));
 }
 
@@ -2578,6 +2941,7 @@ function stepChantier(bl) {
       ${field({ label: 'Ville du chantier', bind: 'chantier.ville', cap: 'words', ic: 'pin', ph: 'Ville' })}
     </div>
     <div class="grid" style="margin-top:14px">${field({ label: 'Adresse du chantier', bind: 'chantier.adresse', ph: 'Rue, lieu-dit…' })}</div>
+    <div id="carte-chantier"></div>
   </div>
   <div class="card">
     ${cardHead('user', 'Chef de chantier', 'Il relit le récapitulatif, signe et reçoit le PDF')}
@@ -2589,111 +2953,131 @@ function stepChantier(bl) {
   </div>`;
 }
 
-/* -------------------------------------------------------------- matériel -- */
+/* -------------------------------------------------------------- matériel --
+   Un bon peut porter plusieurs engins : une pelle et un camion sur le même
+   chantier n'ont ni le même conducteur ni les mêmes heures. Chaque engin a
+   donc sa carte, avec son identification et sa facturation.               */
 function stepMateriel(bl) {
-  const m = matById(bl.materiel.type), cat = m?.cat;
-  const tab = state.matTab || cat || 'camion';
-  const items = MATERIEL.filter(x => x.cat === tab);
-  const metaOf = x => ({ camion: x.remorque ? 'Trajets · pesées · remorque' : 'Trajets · pesées', pelle: 'Facturée à l\'heure', transfert: 'À l\'heure ou au forfait', autre: 'Désignation à la main' }[x.cat]);
-  const allowed = cat ? FACT_BY_CAT[cat] : [];
-  return `
-  <div class="card">
-    ${cardHead('truck', 'Matériel', 'Véhicule ou engin de ce bon')}
-    <div class="seg tabs-wrap" role="tablist" aria-label="Catégorie de matériel">
-      ${CATS.map(c => `<button type="button" role="tab" data-act="mat-tab" data-tab="${c.id}" aria-selected="${c.id === tab}">${c.label}${cat === c.id ? '<span class="count">•</span>' : ''}</button>`).join('')}
+  return bl.engins.map((e, i) => enginCard(bl, e, i)).join('') + `
+  <button type="button" class="btn-dashed" data-act="add-engin">${icon('plus')}Ajouter un engin</button>`;
+}
+
+const titreEngin = (bl, i) => (bl.engins.length > 1 ? `Engin ${i + 1} sur ${bl.engins.length}` : 'Matériel');
+
+function enginCard(bl, e, i) {
+  const m = matById(e.type), cat = m?.cat, plusieurs = bl.engins.length > 1;
+  const retirer = plusieurs ? `<div class="card-h-side"><button type="button" class="icon-btn sm danger" data-act="del-engin" data-i="${i}" aria-label="Retirer cet engin">${icon('trash')}</button></div>` : '';
+  if (!m) {
+    const tab = state.matTab || 'camion';
+    const items = MATERIEL.filter(x => x.cat === tab);
+    const metaOf = x => ({ camion: x.remorque ? 'Trajets · pesées · remorque' : 'Trajets · pesées', pelle: 'Facturée à l\'heure', transfert: 'À l\'heure ou au forfait', autre: 'Désignation à la main' }[x.cat]);
+    return `<div class="card">
+      ${cardHead('truck', titreEngin(bl, i), 'Véhicule ou engin de ce bon', retirer)}
+      <div class="seg tabs-wrap" role="tablist" aria-label="Catégorie de matériel">
+        ${CATS.map(c => `<button type="button" role="tab" data-act="mat-tab" data-tab="${c.id}" aria-selected="${c.id === tab}">${c.label}</button>`).join('')}
+      </div>
+      <div class="vgrid" data-err-anchor="engins.${i}.type">
+        ${items.map((x, k) => `<button type="button" class="vcard" data-act="pick-mat" data-id="${x.id}" data-i="${i}" aria-pressed="false" style="animation-delay:${k * 30}ms">
+          <span class="v-check">${icon('check')}</span><span class="v-ill">${ill(x)}</span><span class="v-label">${esc(x.label)}</span><span class="v-meta">${metaOf(x)}</span></button>`).join('')}
+      </div>
+    </div>`;
+  }
+  const allowed = FACT_BY_CAT[cat];
+  return `<div class="card">
+    ${cardHead('truck', titreEngin(bl, i), 'Véhicule ou engin, conducteur et facturation', retirer)}
+    <div class="engin-choisi">
+      <span class="ec-ill">${ill(m)}</span>
+      <div class="ec-txt"><b>${esc(m.label)}</b><span>${esc(CATS.find(c => c.id === cat)?.meta || '')}</span></div>
+      <button type="button" class="btn btn-ghost btn-sm" data-act="change-engin" data-i="${i}">${icon('refresh')}Changer</button>
     </div>
-    <div class="vgrid" data-err-anchor="materiel.type">
-      ${items.map((x, i) => `<button type="button" class="vcard" data-act="pick-mat" data-id="${x.id}" aria-pressed="${x.id === bl.materiel.type}" style="animation-delay:${i * 30}ms">
-        <span class="v-check">${icon('check')}</span><span class="v-ill">${ill(x)}</span><span class="v-label">${esc(x.label)}</span><span class="v-meta">${metaOf(x)}</span></button>`).join('')}
-    </div>
-    ${cat === 'autre' && tab === 'autre' ? `<div class="grid" style="margin-top:16px">${field({ label: 'Désignation', bind: 'materiel.libreDesignation', req: true, ph: 'Ex. Chargeuse, compacteur, nacelle…' })}</div>` : ''}
-    ${cat === 'transfert' && tab === 'transfert' ? `<div class="grid" style="margin-top:16px">${field({ label: 'Engin transféré', bind: 'materiel.libreDesignation', ph: 'Ex. Pelle 25T', help: 'Départ et arrivée se notent à l\'étape Prestation.' })}</div>` : ''}
-  </div>
-  ${m ? `
-  <div class="card">
-    ${cardHead('hash', 'Identification', cat === 'pelle' ? 'Engin et conducteur' : 'Camion, remorque et conducteur')}
+    ${cat === 'autre' ? `<div class="grid" style="margin-top:14px">${field({ label: 'Désignation', bind: `engins.${i}.libreDesignation`, req: true, ph: 'Ex. Chargeuse, compacteur, nacelle…' })}</div>` : ''}
+    ${cat === 'transfert' ? `<div class="grid" style="margin-top:14px">${field({ label: 'Engin transféré', bind: `engins.${i}.libreDesignation`, ph: 'Ex. Pelle 25T', help: 'Départ et arrivée se notent à l\'étape Prestation.' })}</div>` : ''}
+    <div class="sep"></div>
     <div class="grid g-2">
-      ${field({ label: cat === 'pelle' ? 'N° d\'engin / immat (option)' : 'N° immatriculation camion', bind: 'materiel.immat', req: cat === 'camion', cap: 'code', ph: 'AB-123-CD', ac: 'off' })}
-      ${m.remorque || bl.materiel.remorque ? field({ label: 'N° de remorque', bind: 'materiel.remorque', cap: 'code', ph: 'N° ou immat remorque' }) : '<div></div>'}
-      ${field({ label: 'Conducteur', bind: 'materiel.conducteur', req: true, cap: 'words', ic: 'user', list: 'dl-conducteurs' })}
-      ${field({ label: 'Tél. conducteur', bind: 'materiel.telConducteur', type: 'tel', im: 'tel', ic: 'phone' })}
+      ${field({ label: cat === 'pelle' ? 'N° d\'engin / immat (option)' : 'N° immatriculation', bind: `engins.${i}.immat`, req: cat === 'camion', cap: 'code', ph: 'AB-123-CD', ac: 'off' })}
+      ${m.remorque || e.remorque ? field({ label: 'N° de remorque', bind: `engins.${i}.remorque`, cap: 'code', ph: 'N° ou immat remorque' }) : '<div></div>'}
+      ${field({ label: 'Conducteur', bind: `engins.${i}.conducteur`, req: true, cap: 'words', ic: 'user', list: 'dl-conducteurs' })}
+      ${field({ label: 'Tél. conducteur', bind: `engins.${i}.telConducteur`, type: 'tel', im: 'tel', ic: 'phone' })}
     </div>
-  </div>
-  <div class="card">
-    ${cardHead('file', 'Type de facturation', 'Comme sur le bon CTE')}
+    <div class="sep"></div>
+    <p class="label" style="margin-bottom:8px">Type de facturation</p>
     <div class="radios" role="radiogroup" aria-label="Type de facturation">
-      ${FACT.map(x => { const lock = !allowed.includes(x.id); return `<label class="radio${lock ? ' locked' : ''}"><input type="radio" name="fact" value="${x.id}" data-bind-radio="facturation.mode"${bl.facturation.mode === x.id ? ' checked' : ''}${lock ? ' disabled' : ''}><span class="dot"></span>${x.label}</label>`; }).join('')}
+      ${FACT.map(x => { const lock = !allowed.includes(x.id); return `<label class="radio${lock ? ' locked' : ''}"><input type="radio" name="fact-${i}" value="${x.id}" data-bind-radio="engins.${i}.facturation.mode"${e.facturation.mode === x.id ? ' checked' : ''}${lock ? ' disabled' : ''}><span class="dot"></span>${x.label}</label>`; }).join('')}
     </div>
     ${cat === 'pelle' ? `<div class="note note-info" style="margin-top:12px">${icon('lock')}<span>Toutes les pelles sont facturées à l'heure.</span></div>` : ''}
     <div class="toggles">
-      <label class="switch"><input type="checkbox" data-bind-bool="facturation.nuit"${bl.facturation.nuit ? ' checked' : ''}><span class="track"></span><span>Nuit</span></label>
-      <label class="switch"><input type="checkbox" data-bind-bool="facturation.continu"${bl.facturation.continu ? ' checked' : ''}><span class="track"></span><span>En continu<small>Journée sans coupure</small></span></label>
+      <label class="switch"><input type="checkbox" data-bind-bool="engins.${i}.facturation.nuit"${e.facturation.nuit ? ' checked' : ''}><span class="track"></span><span>Nuit</span></label>
+      <label class="switch"><input type="checkbox" data-bind-bool="engins.${i}.facturation.continu" data-rerender${e.facturation.continu ? ' checked' : ''}><span class="track"></span><span>En continu<small>Journée sans coupure</small></span></label>
     </div>
-  </div>` : ''}`;
+  </div>`;
 }
 
 /* ------------------------------------------------------------ prestation -- */
 function stepPrestation(bl) {
-  const m = matById(bl.materiel.type), cat = m?.cat;
-  if (!m) return `<div class="card">${emptyState('Choisissez d\'abord le matériel', 'Les champs de la prestation dépendent du véhicule ou de l\'engin.', 'semi', '<button type="button" class="btn btn-dark btn-sm" data-act="goto" data-step="materiel">Choisir le matériel</button>')}</div>`;
+  const engins = enginsRemplis(bl);
+  if (!engins.length) return `<div class="card">${emptyState('Choisissez d\'abord le matériel', 'Les champs de la prestation dépendent du véhicule ou de l\'engin.', 'semi', '<button type="button" class="btn btn-dark btn-sm" data-act="goto" data-step="materiel">Choisir le matériel</button>')}</div>`;
   let html = '';
-  if (cat === 'pelle') {
-    html += `<div class="card">${cardHead('file', 'Bon simple', 'Location à l\'heure')}
-      <div class="row" style="gap:20px;flex-wrap:nowrap"><div style="width:130px;flex:none;color:var(--accent-ink)">${ill(m)}</div>
-      <div><p style="font-weight:800;font-size:21px;line-height:1.2">${esc(designationPrincipale(bl))}</p><p class="muted" style="margin-top:4px">Rien d'autre à saisir ici : notez les heures à l'étape suivante. Ajoutez une ligne ci-dessous si besoin.</p></div></div></div>`;
+  for (const e of engins) {
+    const i = bl.engins.indexOf(e), cat = catOf(e), m = matById(e.type);
+    if (engins.length > 1) html += `<p class="engin-sep">${ill(m)}${esc(designationEngin(e))}${e.conducteur ? `<span>${esc(e.conducteur)}</span>` : ''}</p>`;
+    if (cat === 'pelle') {
+      html += `<div class="card">${cardHead('file', 'Bon simple', 'Location à l\'heure')}
+        <div class="row" style="gap:20px;flex-wrap:nowrap"><div style="width:130px;flex:none;color:var(--accent-ink)">${ill(m)}</div>
+        <div><p style="font-weight:800;font-size:21px;line-height:1.2">${esc(designationEngin(e))}</p><p class="muted" style="margin-top:4px">Rien d'autre à saisir ici : notez les heures à l'étape suivante. Ajoutez une ligne plus bas si besoin.</p></div></div></div>`;
+    }
+    if (cat === 'camion' || cat === 'transfert') html += trajetsCard(e, i, cat);
+    if (cat === 'camion') html += materiauxCard(e, i);
   }
-  if (cat === 'camion' || cat === 'transfert') html += trajetsCard(bl, cat);
-  if (cat === 'camion') html += materiauxCard(bl);
   html += lignesCard(bl);
   html += `<div class="card">${cardHead('note', 'Observations', 'Remarques visibles sur le bon')}
     <div class="field" data-field="observations"><label for="f-observations" class="sr-only">Observations</label><textarea id="f-observations" data-bind="observations" placeholder="Accès difficile, attente, casse, consignes…">${esc(bl.observations)}</textarea></div></div>`;
   return html;
 }
 
-function trajetsCard(bl, cat) {
-  const t = totalTours(bl);
-  const rows = bl.trajets.map((tj, i) => `
+function trajetsCard(e, i, cat) {
+  const t = toursEngin(e);
+  const rows = e.trajets.map((tj, j) => `
     <div class="trajet">
-      <div class="tj-idx">${i + 1}</div>
+      <div class="tj-idx">${j + 1}</div>
       <div class="tj-route">
-        <div class="tj-pt"><span class="dot dot-a"></span>${field({ label: 'Départ · lieu de chargement', bind: `trajets.${i}.depart`, ph: 'Carrière, dépôt, chantier…', list: 'dl-lieux' })}</div>
-        <div class="tj-pt"><span class="dot dot-b"></span>${field({ label: 'Arrivée · lieu de déchargement', bind: `trajets.${i}.arrivee`, ph: 'Chantier, centre de tri…', list: 'dl-lieux' })}</div>
+        <div class="tj-pt"><span class="dot dot-a"></span>${field({ label: 'Départ · lieu de chargement', bind: `engins.${i}.trajets.${j}.depart`, ph: 'Carrière, dépôt, chantier…', list: 'dl-lieux' })}</div>
+        <div class="tj-pt"><span class="dot dot-b"></span>${field({ label: 'Arrivée · lieu de déchargement', bind: `engins.${i}.trajets.${j}.arrivee`, ph: 'Chantier, centre de tri…', list: 'dl-lieux' })}</div>
       </div>
       <div class="tj-side">
         <span class="label">Tours</span>
-        <div class="numstep"><button type="button" data-act="tour" data-i="${i}" data-d="-1" aria-label="Retirer un tour">${icon('minus')}</button><input type="text" inputmode="numeric" data-bind="trajets.${i}.tours" data-int value="${esc(tj.tours)}" aria-label="Nombre de tours du trajet ${i + 1}"><button type="button" data-act="tour" data-i="${i}" data-d="1" aria-label="Ajouter un tour">${icon('plus')}</button></div>
+        <div class="numstep"><button type="button" data-act="tour" data-i="${i}" data-j="${j}" data-d="-1" aria-label="Retirer un tour">${icon('minus')}</button><input type="text" inputmode="numeric" data-bind="engins.${i}.trajets.${j}.tours" data-int value="${esc(tj.tours)}" aria-label="Nombre de tours du trajet ${j + 1}"><button type="button" data-act="tour" data-i="${i}" data-j="${j}" data-d="1" aria-label="Ajouter un tour">${icon('plus')}</button></div>
         <div class="tj-tools">
-          <button type="button" class="icon-btn sm" data-act="retour" data-i="${i}" aria-label="Ajouter le trajet retour" title="Ajouter le retour">${icon('swap')}</button>
-          <button type="button" class="icon-btn sm danger" data-act="del-trajet" data-i="${i}" aria-label="Supprimer le trajet ${i + 1}">${icon('trash')}</button>
+          <button type="button" class="icon-btn sm" data-act="retour" data-i="${i}" data-j="${j}" aria-label="Ajouter le trajet retour" title="Ajouter le retour">${icon('swap')}</button>
+          <button type="button" class="icon-btn sm danger" data-act="del-trajet" data-i="${i}" data-j="${j}" aria-label="Supprimer le trajet ${j + 1}">${icon('trash')}</button>
         </div>
       </div>
     </div>`).join('');
   return `<div class="card">
-    ${cardHead('route', cat === 'transfert' ? 'Transfert' : 'Trajets', 'D\'où on part, où on va · nombre de tours', `<span class="sum-badge" data-live="tours">${t} tour${t > 1 ? 's' : ''}</span>`)}
+    ${cardHead('route', cat === 'transfert' ? 'Transfert' : 'Trajets', 'D\'où on part, où on va · nombre de tours', `<span class="sum-badge" data-live="tours-${i}">${t} tour${t > 1 ? 's' : ''}</span>`)}
     ${rows ? `<div class="trajets">${rows}</div>` : ''}
-    <button type="button" class="btn-dashed" data-act="add-trajet">${icon('plus')}Ajouter un trajet</button>
+    <button type="button" class="btn-dashed" data-act="add-trajet" data-i="${i}">${icon('plus')}Ajouter un trajet</button>
   </div>`;
 }
 
-function materiauxCard(bl) {
-  const u = unitMat(bl);
-  const names = [...MATERIAUX, ...bl.materiaux.map(x => x.nom).filter(n => !MATERIAUX.includes(n))];
-  const on = n => bl.materiaux.some(x => x.nom === n);
-  const blocks = bl.materiaux.map((mt, k) => `
+function materiauxCard(e, i) {
+  const u = unitMat(e);
+  const names = [...MATERIAUX, ...e.materiaux.map(x => x.nom).filter(n => !MATERIAUX.includes(n))];
+  const on = n => e.materiaux.some(x => x.nom === n);
+  const blocks = e.materiaux.map((mt, k) => `
     <div class="matblock">
-      <div class="mb-head"><strong>${esc(mt.nom)}</strong><span class="mb-total" data-live="mat-${k}">${fmtNum(mt.pesees.reduce((a, p) => a + num(p.poids), 0))} ${u}</span>
-        <button type="button" class="icon-btn sm" data-act="toggle-mat" data-name="${esc(mt.nom)}" aria-label="Retirer ${esc(mt.nom)}">${icon('x')}</button></div>
-      ${mt.pesees.map((p, j) => `<div class="pesee">
-        ${field({ label: u === 'm³' ? 'Volume' : 'Poids', bind: `materiaux.${k}.pesees.${j}.poids`, im: 'decimal', ph: '0,00', suffix: u })}
-        ${field({ label: 'N° de pesée (option)', bind: `materiaux.${k}.pesees.${j}.num`, cap: 'code', ph: 'Ticket n°', ic: 'hash' })}
-        <button type="button" class="icon-btn sm danger" data-act="del-pesee" data-k="${k}" data-j="${j}" aria-label="Supprimer cette pesée"${mt.pesees.length < 2 ? ' style="visibility:hidden" tabindex="-1"' : ''}>${icon('trash')}</button>
+      <div class="mb-head"><strong>${esc(mt.nom)}</strong><span class="mb-total" data-live="mat-${i}-${k}">${fmtNum(mt.pesees.reduce((a, p) => a + num(p.poids), 0))} ${u}</span>
+        <button type="button" class="icon-btn sm" data-act="toggle-mat" data-i="${i}" data-name="${esc(mt.nom)}" aria-label="Retirer ${esc(mt.nom)}">${icon('x')}</button></div>
+      ${mt.pesees.map((pe, j) => `<div class="pesee">
+        ${field({ label: u === 'm³' ? 'Volume' : 'Poids', bind: `engins.${i}.materiaux.${k}.pesees.${j}.poids`, im: 'decimal', ph: '0,00', suffix: u })}
+        ${field({ label: 'N° de pesée (option)', bind: `engins.${i}.materiaux.${k}.pesees.${j}.num`, cap: 'code', ph: 'Ticket n°', ic: 'hash' })}
+        <button type="button" class="icon-btn sm danger" data-act="del-pesee" data-i="${i}" data-k="${k}" data-j="${j}" aria-label="Supprimer cette pesée"${mt.pesees.length < 2 ? ' style="visibility:hidden" tabindex="-1"' : ''}>${icon('trash')}</button>
       </div>`).join('')}
-      <button type="button" class="link-btn" data-act="add-pesee" data-k="${k}">${icon('plus')}Ajouter une pesée</button>
+      <button type="button" class="link-btn" data-act="add-pesee" data-i="${i}" data-k="${k}">${icon('plus')}Ajouter une pesée</button>
     </div>`).join('');
   return `<div class="card">
-    ${cardHead('box', 'Matériaux', 'À cocher · quantité = poids, n° de pesée en option', `<span class="sum-badge soft" data-live="mat-total">${fmtNum(totalMateriaux(bl))} ${u}</span>`)}
-    <div class="mchips">${names.map(n => `<button type="button" class="mchip" data-act="toggle-mat" data-name="${esc(n)}" aria-pressed="${on(n)}"><span class="box">${icon('check')}</span>${esc(n)}</button>`).join('')}</div>
-    <div class="add-inline"><input class="input" id="mat-autre" placeholder="Autre matériau…" aria-label="Autre matériau" enterkeyhint="done"><button type="button" class="btn btn-ghost" data-act="add-mat">${icon('plus')}Ajouter</button></div>
+    ${cardHead('box', 'Matériaux', 'À cocher · quantité = poids, n° de pesée en option', `<span class="sum-badge soft" data-live="mat-total-${i}">${fmtNum(materiauxEngin(e))} ${u}</span>`)}
+    <div class="mchips">${names.map(n => `<button type="button" class="mchip" data-act="toggle-mat" data-i="${i}" data-name="${esc(n)}" aria-pressed="${on(n)}"><span class="box">${icon('check')}</span>${esc(n)}</button>`).join('')}</div>
+    <div class="add-inline"><input class="input" id="mat-autre-${i}" placeholder="Autre matériau…" aria-label="Autre matériau" enterkeyhint="done"><button type="button" class="btn btn-ghost" data-act="add-mat" data-i="${i}">${icon('plus')}Ajouter</button></div>
     ${blocks ? `<div class="matblocks">${blocks}</div>` : ''}
   </div>`;
 }
@@ -2720,66 +3104,82 @@ function lignesCard(bl) {
 
 /* ---------------------------------------------------------------- heures -- */
 function stepHeures(bl) {
-  const c = bl.facturation.continu, h = bl.horaires, prevu = bl.source?.prevu;
-  const period = (label, ic, a, b, key) => { const d = dur(h[a], h[b]); return `<div class="period">
+  const engins = enginsRemplis(bl);
+  if (!engins.length) return `<div class="card">${emptyState('Choisissez d\'abord le matériel', 'Les heures se notent engin par engin.', 'semi', '<button type="button" class="btn btn-dark btn-sm" data-act="goto" data-step="materiel">Choisir le matériel</button>')}</div>`;
+  return engins.map(e => heuresCard(bl, e, bl.engins.indexOf(e), engins.length > 1)).join('') + hoursRecapHtml(bl);
+}
+
+function heuresCard(bl, e, i, plusieurs) {
+  const c = e.facturation.continu, h = e.horaires, prevu = bl.source?.prevu;
+  const period = (label, ic, a, b) => { const d = dur(h[a], h[b]); return `<div class="period" data-engin="${i}">
       <div class="p-head">${icon(ic)}${label}<span class="p-dur${d ? '' : ' zero'}">${fmtH(d)}</span></div>
-      <div class="p-times">${timeField('Arrivée chantier', a)}<span class="p-arrow">${icon('arrowR')}</span>${timeField('Départ chantier', b)}</div></div>`; };
+      <div class="p-times">${timeField('Arrivée chantier', i, a)}<span class="p-arrow">${icon('arrowR')}</span>${timeField('Départ chantier', i, b)}</div></div>`; };
+  const tete = plusieurs
+    ? `<header class="card-h"><span class="ic">${ill(matById(e.type))}</span><div><h2>${esc(designationEngin(e))}</h2><p>${esc(e.conducteur || 'Conducteur à renseigner')}</p></div><div class="card-h-side"><span class="sum-badge">${fmtH(minutesEngin(e))}</span></div></header>`
+    : cardHead('clock', 'Heures', 'Arrivée et départ du chantier, au quart d\'heure');
   return `
   <div class="card">
-    ${cardHead('clock', 'Heures', 'Arrivée et départ du chantier, au quart d\'heure')}
+    ${tete}
     <div class="h-tools">
-      <label class="switch"><input type="checkbox" data-bind-bool="facturation.continu" data-rerender${c ? ' checked' : ''}><span class="track"></span><span>Journée continue</span></label>
+      <label class="switch"><input type="checkbox" data-bind-bool="engins.${i}.facturation.continu" data-rerender${c ? ' checked' : ''}><span class="track"></span><span>Journée continue</span></label>
       <span class="spacer"></span>
-      ${prevu ? `<button type="button" class="chip-btn" data-act="apply-prevu">${icon('calendar')}Prévu à l'agenda ${esc(prevu.debut)}–${esc(prevu.fin)}</button>` : ''}
-      <button type="button" class="chip-btn" data-act="preset">${icon('sparkles')}${c ? '7h30 → 15h30' : '7h30–12h · 13h–17h'}</button>
+      ${prevu ? `<button type="button" class="chip-btn" data-act="apply-prevu" data-i="${i}">${icon('calendar')}Prévu ${esc(prevu.debut)}–${esc(prevu.fin)}</button>` : ''}
+      ${i > 0 ? `<button type="button" class="chip-btn" data-act="copy-heures" data-i="${i}">${icon('copy')}Mêmes heures que le 1er</button>` : ''}
+      <button type="button" class="chip-btn" data-act="preset" data-i="${i}">${icon('sparkles')}${c ? '7h30 → 15h30' : '7h30–12h · 13h–17h'}</button>
     </div>
     <div class="periods${c ? ' single' : ''}">
       ${c ? period('Journée continue', 'sun', 'matinArr', 'matinDep') : period('Matin', 'sun', 'matinArr', 'matinDep') + period('Après-midi', 'sunset', 'amArr', 'amDep')}
     </div>
-  </div>
-  ${hoursRecapHtml(bl)}`;
+  </div>`;
 }
 
-function timeField(label, key) {
-  const v = state.bl.horaires[key];
-  return `<div class="tfield${v ? '' : ' empty'}" data-time="horaires.${key}"><span class="t-label">${label}</span>
+function timeField(label, i, key) {
+  const v = state.bl.engins[i].horaires[key];
+  return `<div class="tfield${v ? '' : ' empty'}" data-time="engins.${i}.horaires.${key}"><span class="t-label">${label}</span>
     <div class="t-row">
-      <button type="button" class="t-step" data-act="t-step" data-k="${key}" data-d="-15" aria-label="${label} : moins 15 minutes">${icon('minus')}</button>
-      <button type="button" class="t-val" data-act="t-open" data-k="${key}" aria-label="${label} : ${v || 'choisir l\'heure'}">${v || '--:--'}</button>
-      <button type="button" class="t-step" data-act="t-step" data-k="${key}" data-d="15" aria-label="${label} : plus 15 minutes">${icon('plus')}</button>
+      <button type="button" class="t-step" data-act="t-step" data-i="${i}" data-k="${key}" data-d="-15" aria-label="${label} : moins 15 minutes">${icon('minus')}</button>
+      <button type="button" class="t-val" data-act="t-open" data-i="${i}" data-k="${key}" aria-label="${label} : ${v || 'choisir l\'heure'}">${v || '--:--'}</button>
+      <button type="button" class="t-step" data-act="t-step" data-i="${i}" data-k="${key}" data-d="15" aria-label="${label} : plus 15 minutes">${icon('plus')}</button>
     </div></div>`;
 }
 
 /* Appuis rapides sur − / + : on met à jour les quelques endroits concernés
    au lieu de redessiner toute l'étape. Redessiner remplaçait le bouton sous
    le doigt, et les appuis suivants se perdaient. */
-function majHeures(cle) {
-  const bl = state.bl, h = bl.horaires;
-  const champ = $(`[data-time="horaires.${cle}"]`);
+function majHeures(i, cle) {
+  const bl = state.bl, e = bl.engins[i], h = e.horaires;
+  const champ = $(`[data-time="engins.${i}.horaires.${cle}"]`);
   if (champ) {
     champ.classList.toggle('empty', !h[cle]);
     const val = champ.querySelector('.t-val');
     if (val) val.textContent = h[cle] || '--:--';
     clearFieldError(champ);
   }
-  $$('.period').forEach(p => {
-    const [a, b] = $$('[data-time]', p).map(e => e.dataset.time.split('.')[1]);
+  $$(`.period[data-engin="${i}"]`).forEach(p => {
+    const [a, b] = $$('[data-time]', p).map(x => x.dataset.time.split('.').pop());
     const d = dur(h[a], h[b]), el = p.querySelector('.p-dur');
     if (el) { el.textContent = fmtH(d); el.classList.toggle('zero', !d); }
   });
+  const badge = $(`.period[data-engin="${i}"]`)?.closest('.card')?.querySelector('.card-h-side .sum-badge');
+  if (badge) badge.textContent = fmtH(minutesEngin(e));
   const recap = $('.hrecap');
   if (recap) recap.outerHTML = hoursRecapHtml(bl);
 }
 
 function hoursRecapHtml(bl) {
-  const h = bl.horaires, c = bl.facturation.continu, mins = minutesTotal(bl);
+  const engins = enginsRemplis(bl), mins = minutesTotal(bl);
   const row = (l, a, b) => `<div class="hr-row"><span>${l}</span><b>${a && b ? `${a} → ${b}` : '—'}</b><em>${fmtH(dur(a, b))}</em></div>`;
+  const bloc = e => {
+    const h = e.horaires;
+    return `${engins.length > 1 ? `<div class="hr-eng">${esc(designationEngin(e))}<em>${fmtH(minutesEngin(e))}</em></div>` : ''}
+      ${e.facturation.continu ? row('Journée continue', h.matinArr, h.matinDep) : row('Matin', h.matinArr, h.matinDep) + row('Après-midi', h.amArr, h.amDep)}`;
+  };
   return `<div class="hrecap" role="status">
     <div class="hr-top"><span class="eyebrow">Récap des heures</span><span>${esc(cap(frLong(bl.date)))}</span></div>
-    <div class="hr-total"><b>${fmtH(mins)}</b><span>soit ${fmtDec(mins)} h${bl.facturation.mode === 'heure' ? ' facturées' : ''}</span></div>
+    <div class="hr-total"><b>${fmtH(mins)}</b><span>soit ${fmtDec(mins)} h${engins.length > 1 ? ' au total' : ''}</span></div>
     <div class="hr-rows">
-      ${c ? row('Journée continue', h.matinArr, h.matinDep) : row('Matin', h.matinArr, h.matinDep) + row('Après-midi', h.amArr, h.amDep)}
-      <div class="hr-row"><span>Facturation</span><b>${esc(factLine(bl) || '—')}</b><em></em></div>
+      ${engins.map(bloc).join('')}
+      ${engins.length === 1 ? `<div class="hr-row"><span>Facturation</span><b>${esc(factLine(engins[0]) || '—')}</b><em></em></div>` : ''}
     </div></div>`;
 }
 
@@ -2801,7 +3201,6 @@ function linesHtml(lines) {
 
 /* ----------------------------------------------------------------- récap -- */
 function stepRecap(bl) {
-  const m = matById(bl.materiel.type);
   const res = ['chantier', 'materiel', 'prestation', 'heures'].map(s => validate(bl, s));
   const errors = res.flatMap(r => r.errors), warnings = res.flatMap(r => r.warnings);
   const stepName = k => STEPS.find(s => s.key === k)?.label || '';
@@ -2815,7 +3214,7 @@ function stepRecap(bl) {
     ${cardHead('file', 'Récapitulatif', 'À relire avec le chef de chantier avant de signer', `<div class="card-h-side"><button type="button" class="btn btn-soft btn-sm" data-act="preview-pdf">${icon('eye')}Aperçu PDF</button></div>`)}
     ${notes ? `<div class="warns">${notes}</div>` : `<div class="note note-accent" style="margin-bottom:8px">${icon('check')}<span>Tout est complet. Le chef de chantier peut signer.</span></div>`}
     ${sec('Chantier', 'chantier', `<dl class="dl">${item('Date', frDate(bl.date))}${item('Client', bl.client.nom)}${item('Chantier', [bl.chantier.nom, bl.chantier.ville].filter(Boolean).join(' · '))}${item('Adresse chantier', bl.chantier.adresse)}${item('N° chantier', bl.chantier.numero)}${item('N° commande', bl.chantier.commande)}${item('Chef de chantier', bl.chef.nom)}${item('Contact chef', [bl.chef.tel, bl.chef.email].filter(Boolean).join(' · '))}</dl>`)}
-    ${sec('Matériel & facturation', 'materiel', `<dl class="dl">${item('Matériel', designationPrincipale(bl))}${item(m?.cat === 'pelle' ? 'N° engin' : 'Immatriculation', bl.materiel.immat)}${m?.remorque ? item('N° remorque', bl.materiel.remorque) : ''}${item('Conducteur', bl.materiel.conducteur)}${item('Facturation', factLine(bl))}</dl>`)}
+    ${sec(bl.engins.length > 1 ? 'Engins & facturation' : 'Matériel & facturation', 'materiel', enginsRemplis(bl).map(e => `<dl class="dl">${item('Matériel', designationEngin(e))}${item(catOf(e) === 'pelle' ? 'N° engin' : 'Immatriculation', e.immat)}${matById(e.type)?.remorque ? item('N° remorque', e.remorque) : ''}${item('Conducteur', e.conducteur)}${item('Facturation', factLine(e))}</dl>`).join('<div class="sep"></div>') || '<p class="muted">Aucun engin.</p>')}
     ${sec('Prestation', 'prestation', lines.length ? `${linesHtml(lines)}${bl.observations ? `<p style="margin-top:12px"><b>Observations :</b> ${esc(bl.observations)}</p>` : ''}` : '<p class="muted">Aucune ligne.</p>')}
     ${sec('Heures', 'heures', hoursRecapHtml(bl))}
   </div>`;
@@ -2911,7 +3310,14 @@ const STEP_VIEWS = { chantier: stepChantier, materiel: stepMateriel, prestation:
 /* ------------------------------------------------------ signer & envoyer -- */
 const wait = ms => new Promise(r => setTimeout(r, ms));
 
+/* Le chef de chantier appuie souvent deux fois quand le réseau traîne.
+   Sans ce verrou, le téléphone refabrique le PDF et relance l'envoi à chaque
+   appui — la base refuse la deuxième signature, mais l'erreur s'affiche
+   par-dessus l'écran de réussite. */
+let signatureEnCours = false;
+
 async function signAndSend() {
+  if (signatureEnCours) return;
   const bl = state.bl;
   const res = ['chantier', 'materiel', 'prestation', 'heures', 'signature'].map(s => validate(bl, s));
   const errors = res.flatMap(r => r.errors);
@@ -2932,6 +3338,7 @@ async function signAndSend() {
     <ul class="proc">${etapes.map(([id, l]) => `<li data-p="${id}"><span class="p-ic">${icon('check')}</span><span>${esc(l)}</span></li>`).join('')}</ul><div id="proc-err"></div>`, { dismissable: false });
   const mark = (id, s) => { const li = root.querySelector(`[data-p="${id}"]`); if (li) li.className = s; };
   let run = 'num';
+  signatureEnCours = true;
   try {
     mark('num', 'run'); await saveNow(true);
     const { numero } = await api('POST', `/bons/${bl.id}/numero`); bl.numero = numero; mark('num', 'ok');
@@ -2942,10 +3349,11 @@ async function signAndSend() {
     const signed = await api('POST', `/bons/${bl.id}/signer`, { bon: bl, pdfBase64: b64 });
     mark('save', 'ok'); await wait(250);
     mark('mail', ['envoye', 'local'].includes(signed.mail?.statut) ? 'ok' : 'ko');
-    LS.set(CLE('prefs'), { conducteur: bl.materiel.conducteur, telConducteur: bl.materiel.telConducteur });
-    LS.set(CLE('lieux'), [...new Set([...bl.trajets.flatMap(t => [t.depart, t.arrivee]), ...LS.get(CLE('lieux'), [])].filter(Boolean))].slice(0, 30));
+    memoriserEngins(bl);
+    LS.set(CLE('lieux'), [...new Set([...bl.engins.flatMap(e => e.trajets.flatMap(t => [t.depart, t.arrivee])), ...LS.get(CLE('lieux'), [])].filter(Boolean))].slice(0, 30));
     LS.del(CLE(`backup:${bl.id}`));
-    LS.set(CLE('signes'), [{ numero: bl.numero, date: bl.date, client: bl.client.nom, le: new Date().toISOString() }, ...LS.get(CLE('signes'), [])].slice(0, 50));
+    // « uid » : l'intervention du planning d'où vient ce bon, pour ne pas la reproposer
+    LS.set(CLE('signes'), [{ id: bl.id, numero: bl.numero, date: bl.date, client: bl.client.nom, uid: bl.source?.agendaUid || null, minutes: minutesTotal(bl), statut: signed.statut, le: new Date().toISOString() }, ...LS.get(CLE('signes'), [])].slice(0, 50));
     state.bl = signed; state.sig = null;
     await wait(550);
     closeModal(true);
@@ -2957,12 +3365,12 @@ async function signAndSend() {
       <div class="modal-actions"><button type="button" class="btn btn-ghost" data-proc="close">Fermer</button><button type="button" class="btn btn-dark" data-proc="retry">Réessayer</button></div>`;
     root.querySelector('[data-proc="close"]').onclick = () => closeModal();
     root.querySelector('[data-proc="retry"]').onclick = () => { closeModal(true); signAndSend(); };
-  }
+  } finally { signatureEnCours = false; }
 }
 
 /* ---------------------------------------------------------- écran final -- */
 function viewDone(bl) {
-  const m = matById(bl.materiel.type), mail = bl.mail, mins = minutesTotal(bl);
+  const engins = enginsRemplis(bl), mail = bl.mail, mins = minutesTotal(bl);
   const mailBody = !mail ? '<p class="muted">Pas encore envoyé.</p>'
     : mail.statut === 'local' ? `<div class="note note-info">${icon('mail')}<span>Mail préparé pour <b>${esc(mail.to)}</b> avec le PDF en pièce jointe. <br>Prototype local : aucun envoi réel.</span></div>
         <div class="row" style="margin-top:12px"><button type="button" class="btn btn-ghost btn-sm" data-act="mail-preview" data-url="${mail.apercu}">${icon('eye')}Aperçu du mail</button><a class="btn btn-ghost btn-sm" href="${mail.eml}" download>${icon('download')}Fichier .eml</a></div>`
@@ -2989,7 +3397,7 @@ function viewDone(bl) {
       </article>
       <article class="card rise span-2" style="animation-delay:.1s">
         ${cardHead('list', 'Contenu du bon', `${esc(bl.client.nom)} · ${esc([bl.chantier.nom, bl.chantier.ville].filter(Boolean).join(' · '))}`, `<div class="card-h-side"><span class="sum-badge">${fmtH(mins)}</span></div>`)}
-        <div class="row" style="gap:18px;flex-wrap:nowrap;margin-bottom:14px">${m ? `<div style="width:96px;flex:none;color:var(--accent-ink)">${ill(m)}</div>` : ''}<div><b style="font-size:17px">${esc(designationPrincipale(bl))}</b><p class="muted">${esc([bl.materiel.immat, bl.materiel.conducteur, factLine(bl)].filter(Boolean).join(' · '))}</p></div></div>
+        ${engins.map(e => `<div class="row" style="gap:18px;flex-wrap:nowrap;margin-bottom:14px"><div style="width:96px;flex:none;color:var(--accent-ink)">${ill(matById(e.type))}</div><div><b style="font-size:17px">${esc(designationEngin(e))}</b><p class="muted">${esc([e.immat, e.conducteur, factLine(e), minutesEngin(e) ? fmtH(minutesEngin(e)) : ''].filter(Boolean).join(' · '))}</p></div></div>`).join('')}
         ${linesHtml(lignesBL(bl))}
       </article>
     </div>
@@ -3073,16 +3481,28 @@ async function createBL(q) {
   if (evUid && date) {
     const { events } = await api('GET', `/agenda?from=${date}&to=${date}`);
     const ev = events.find(e => e.uid === evUid);
-    if (ev?.bon) return location.replace(`#/bl/${ev.bon.id}/${ev.bon.statut === 'brouillon' ? 'chantier' : 'ok'}`);
+    // Intervention déjà traitée : on reprend le brouillon au lieu d'ouvrir un second bon.
+    if (ev?.bon?.statut === 'brouillon') return location.replace(`#/bl/${ev.bon.id}/chantier`);
+    if (ev?.bon && !CHAUFFEUR) return location.replace(`#/bl/${ev.bon.id}/ok`);
+    if (ev?.bon) { location.replace('#/'); toast(`Cette intervention a déjà le bon N° ${ev.bon.numero}.`, 'error'); return; }
     if (ev) { extra = fromAgenda(ev); msg = 'Bon prérempli depuis l\'agenda'; }
   } else if (dup) {
     const s = state.bl?.id === dup ? state.bl : await api('GET', `/bons/${dup}`);
-    extra = { client: s.client, chantier: s.chantier, chef: s.chef, materiel: s.materiel, facturation: s.facturation,
-      trajets: (s.trajets || []).map(t => ({ ...t })), materiaux: (s.materiaux || []).map(x => ({ nom: x.nom, pesees: [{ poids: '', num: '' }] })),
-      lignes: (s.lignes || []).map(l => ({ ...l })) };
+    const source = newBL(s);   // convertit au besoin un bon d'avant les engins multiples
+    extra = { client: source.client, chantier: source.chantier, chef: source.chef,
+      engins: source.engins.map(e => newEngin({ ...e, horaires: { matinArr: '', matinDep: '', amArr: '', amDep: '' },
+        trajets: (e.trajets || []).map(t => ({ ...t })),
+        materiaux: (e.materiaux || []).map(x => ({ nom: x.nom, pesees: [{ poids: '', num: '' }] })) })),
+      lignes: (source.lignes || []).map(l => ({ ...l })) };
     msg = `Bon dupliqué depuis le N° ${s.numero || 'brouillon'}`;
   }
-  const saved = await api('POST', '/bons', newBL(extra));
+  const premier = newBL(extra);
+  if (!premier.engins[0].conducteur) {
+    const prefs = LS.get(CLE('prefs'), {});
+    premier.engins[0].conducteur = prefs.conducteur || '';
+    premier.engins[0].telConducteur = prefs.telConducteur || '';
+  }
+  const saved = await api('POST', '/bons', premier);
   state.bl = newBL(saved); state.sig = null; state.matTab = null;
   LS.set(CLE(`backup:${saved.id}`), { ...state.bl, majLe: new Date().toISOString() });
   location.replace(`#/bl/${saved.id}/chantier`);
@@ -3121,6 +3541,7 @@ app.addEventListener('input', e => {
   setPath(state.bl, el.dataset.bind, el.value);
   clearFieldError(el);
   changed();
+  if (el.dataset.bind === 'chantier.adresse' || el.dataset.bind === 'chantier.ville') majCarte();
 });
 app.addEventListener('change', e => {
   const el = e.target; if (!state.bl) return;
@@ -3139,7 +3560,7 @@ app.addEventListener('change', e => {
 app.addEventListener('keydown', e => {
   if (e.key !== 'Enter' || e.isComposing) return;
   const el = e.target;
-  if (el.id === 'mat-autre') { e.preventDefault(); ACTIONS['add-mat'](); return; }
+  if (el.id?.startsWith('mat-autre-')) { e.preventDefault(); ACTIONS['add-mat']({ dataset: { i: el.id.split('-').pop() } }); return; }
   // touche « Suivant » du clavier : passe au champ suivant de l'étape
   if (!el.matches('#step input[data-bind]')) return;
   e.preventDefault();
@@ -3155,9 +3576,9 @@ document.addEventListener('focusin', e => { if (toucher.matches && estChampTexte
 document.addEventListener('focusout', () => setTimeout(() => { if (!estChampTexte(document.activeElement)) document.body.classList.remove('typing'); }, 60));
 
 /* --------------------------------------------------------------- actions -- */
-const setTime = (key, v, surPlace) => {
-  state.bl.horaires[key] = v;
-  if (surPlace) { majHeures(key); changed(); } else changed({ rerender: true });
+const setTime = (i, key, v, surPlace) => {
+  state.bl.engins[i].horaires[key] = v;
+  if (surPlace) { majHeures(i, key); changed(); } else changed({ rerender: true });
 };
 
 const ACTIONS = {
@@ -3202,6 +3623,11 @@ const ACTIONS = {
   },
   'export-csv': () => { if (!state.bons?.length) { toast('Aucun bon à exporter', 'error'); return; } exporterCsv(state.bons); toast('Tableau exporté'); },
   deconnexion: async () => { if (await confirmModal({ title: 'Se déconnecter ?', text: 'Il faudra ressaisir l\'identifiant et le mot de passe.', ok: 'Se déconnecter' })) deconnexion(); },
+  gps: t => ouvrirGps(+t.dataset.lat, +t.dataset.lon, t.dataset.label),
+  'copier-adresse': async t => {
+    try { await navigator.clipboard.writeText(t.dataset.label); toast('Adresse copiée'); closeModal(); }
+    catch { toast('Copie impossible sur cet appareil', 'error'); }
+  },
   'copy-tpl': async () => { try { await navigator.clipboard.writeText(agendaDescription()); toast('Modèle copié'); } catch { toast('Copie impossible, sélectionnez le texte', 'error'); } },
   // navigation assistant
   goto: (t, e) => { e.preventDefault(); goStep(t.dataset.step); },
@@ -3215,45 +3641,74 @@ const ACTIONS = {
   // matériel
   'mat-tab': t => { state.matTab = t.dataset.tab; renderStep({ keepScroll: true }); },
   'pick-mat': t => {
-    const bl = state.bl, m = matById(t.dataset.id);
-    bl.materiel.type = m.id; state.matTab = m.cat;
-    if (!['autre', 'transfert'].includes(m.cat)) bl.materiel.libreDesignation = '';
-    if (!FACT_BY_CAT[m.cat].includes(bl.facturation.mode)) bl.facturation.mode = FACT_BY_CAT[m.cat][0];
-    if ((m.cat === 'camion' || m.cat === 'transfert') && !bl.trajets.length) bl.trajets.push({ depart: '', arrivee: '', tours: 1 });
+    const i = +t.dataset.i, e = state.bl.engins[i], m = matById(t.dataset.id);
+    e.type = m.id; state.matTab = m.cat;
+    // la plaque du dernier bon fait avec ce même engin, s'il y en a une
+    const su = immatConnue(m.id);
+    if (su && !e.immat.trim()) { e.immat = su.immat; if (m.remorque && !e.remorque.trim()) e.remorque = su.remorque || ''; }
+    if (!['autre', 'transfert'].includes(m.cat)) e.libreDesignation = '';
+    if (!FACT_BY_CAT[m.cat].includes(e.facturation.mode)) e.facturation.mode = FACT_BY_CAT[m.cat][0];
+    if ((m.cat === 'camion' || m.cat === 'transfert') && !e.trajets.length) e.trajets.push({ depart: '', arrivee: '', tours: 1 });
     clearErrors();
     changed({ rerender: true });
-    if (m.cat === 'autre') { state.focus = 'f-materiel-libreDesignation'; renderStep({ keepScroll: true }); }
+    if (m.cat === 'autre') { state.focus = `f-engins-${i}-libreDesignation`; renderStep({ keepScroll: true }); }
   },
+  // engins du bon
+  'add-engin': () => {
+    // un engin pas encore choisi : inutile d'en empiler un deuxième par-dessus
+    const dernier = state.bl.engins.length - 1;
+    if (dernier >= 0 && !matById(state.bl.engins[dernier].type)) {
+      toast('Choisissez d\'abord ce véhicule ou cet engin', 'error');
+      $(`[data-err-anchor="engins.${dernier}.type"]`)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return;
+    }
+    const prefs = LS.get(CLE('prefs'), {});
+    state.bl.engins.push(newEngin({ conducteur: prefs.conducteur || '', telConducteur: prefs.telConducteur || '' }));
+    state.matTab = null; clearErrors();
+    changed({ rerender: true });
+    window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+  },
+  'del-engin': async t => {
+    const i = +t.dataset.i, e = state.bl.engins[i];
+    const nom = designationEngin(e) || `l'engin ${i + 1}`;
+    if (matById(e.type) && !(await confirmModal({ title: `Retirer ${nom} ?`, text: 'Ses trajets, matériaux et heures seront retirés du bon.', ok: 'Retirer', danger: true }))) return;
+    state.bl.engins.splice(i, 1);
+    if (!state.bl.engins.length) state.bl.engins.push(newEngin());
+    clearErrors(); changed({ rerender: true });
+  },
+  'change-engin': t => { const e = state.bl.engins[+t.dataset.i]; state.matTab = catOf(e); Object.assign(e, { type: '', libreDesignation: '', immat: '', remorque: '' }); changed({ rerender: true }); },
   // trajets
-  'add-trajet': () => { const tr = state.bl.trajets; const last = tr[tr.length - 1]; tr.push({ depart: last?.arrivee || '', arrivee: '', tours: 1 }); state.focus = `f-trajets-${tr.length - 1}-${last?.arrivee ? 'arrivee' : 'depart'}`; changed({ rerender: true }); },
-  'del-trajet': t => { state.bl.trajets.splice(+t.dataset.i, 1); changed({ rerender: true }); },
-  retour: t => { const s = state.bl.trajets[+t.dataset.i]; state.bl.trajets.splice(+t.dataset.i + 1, 0, { depart: s.arrivee, arrivee: s.depart, tours: s.tours }); changed({ rerender: true }); toast('Trajet retour ajouté'); },
-  tour: t => { const tr = state.bl.trajets[+t.dataset.i]; tr.tours = Math.max(1, Math.min(99, (parseInt(tr.tours, 10) || 1) + +t.dataset.d)); const inp = t.parentElement.querySelector('input'); if (inp) inp.value = tr.tours; changed(); },
+  'add-trajet': t => { const tr = state.bl.engins[+t.dataset.i].trajets; const last = tr[tr.length - 1]; tr.push({ depart: last?.arrivee || '', arrivee: '', tours: 1 }); state.focus = `f-engins-${t.dataset.i}-trajets-${tr.length - 1}-${last?.arrivee ? 'arrivee' : 'depart'}`; changed({ rerender: true }); },
+  'del-trajet': t => { state.bl.engins[+t.dataset.i].trajets.splice(+t.dataset.j, 1); changed({ rerender: true }); },
+  retour: t => { const tr = state.bl.engins[+t.dataset.i].trajets, j = +t.dataset.j, s = tr[j]; tr.splice(j + 1, 0, { depart: s.arrivee, arrivee: s.depart, tours: s.tours }); changed({ rerender: true }); toast('Trajet retour ajouté'); },
+  tour: t => { const tj = state.bl.engins[+t.dataset.i].trajets[+t.dataset.j]; tj.tours = Math.max(1, Math.min(99, (parseInt(tj.tours, 10) || 1) + +t.dataset.d)); const inp = t.parentElement.querySelector('input'); if (inp) inp.value = tj.tours; changed(); },
   // matériaux
   'toggle-mat': t => {
-    const list = state.bl.materiaux, name = t.dataset.name, i = list.findIndex(x => x.nom === name);
-    if (i >= 0) list.splice(i, 1); else { list.push({ nom: name, pesees: [{ poids: '', num: '' }] }); state.focus = `f-materiaux-${list.length - 1}-pesees-0-poids`; }
+    const i = +t.dataset.i, list = state.bl.engins[i].materiaux, name = t.dataset.name, k = list.findIndex(x => x.nom === name);
+    if (k >= 0) list.splice(k, 1); else { list.push({ nom: name, pesees: [{ poids: '', num: '' }] }); state.focus = `f-engins-${i}-materiaux-${list.length - 1}-pesees-0-poids`; }
     changed({ rerender: true });
   },
-  'add-mat': () => {
-    const inp = $('#mat-autre'); const name = inp?.value.trim(); if (!name) { inp?.focus(); return; }
-    if (!state.bl.materiaux.some(x => norm(x.nom) === norm(name))) state.bl.materiaux.push({ nom: name, pesees: [{ poids: '', num: '' }] });
-    state.focus = `f-materiaux-${state.bl.materiaux.length - 1}-pesees-0-poids`;
+  'add-mat': t => {
+    const i = +t.dataset.i, inp = $(`#mat-autre-${i}`); const name = inp?.value.trim(); if (!name) { inp?.focus(); return; }
+    const list = state.bl.engins[i].materiaux;
+    if (!list.some(x => norm(x.nom) === norm(name))) list.push({ nom: name, pesees: [{ poids: '', num: '' }] });
+    state.focus = `f-engins-${i}-materiaux-${list.length - 1}-pesees-0-poids`;
     changed({ rerender: true });
   },
-  'add-pesee': t => { const mt = state.bl.materiaux[+t.dataset.k]; mt.pesees.push({ poids: '', num: '' }); state.focus = `f-materiaux-${t.dataset.k}-pesees-${mt.pesees.length - 1}-poids`; changed({ rerender: true }); },
-  'del-pesee': t => { state.bl.materiaux[+t.dataset.k].pesees.splice(+t.dataset.j, 1); changed({ rerender: true }); },
+  'add-pesee': t => { const i = +t.dataset.i, mt = state.bl.engins[i].materiaux[+t.dataset.k]; mt.pesees.push({ poids: '', num: '' }); state.focus = `f-engins-${i}-materiaux-${t.dataset.k}-pesees-${mt.pesees.length - 1}-poids`; changed({ rerender: true }); },
+  'del-pesee': t => { state.bl.engins[+t.dataset.i].materiaux[+t.dataset.k].pesees.splice(+t.dataset.j, 1); changed({ rerender: true }); },
   // lignes libres
   'add-ligne': () => { state.bl.lignes.push({ designation: '', unite: 'h', quantite: '' }); state.focus = `f-lignes-${state.bl.lignes.length - 1}-designation`; changed({ rerender: true }); },
   'del-ligne': t => { state.bl.lignes.splice(+t.dataset.i, 1); changed({ rerender: true }); },
   // heures
-  't-open': t => openTimeSheet(`horaires.${t.dataset.k}`, v => setTime(t.dataset.k, v)),
-  't-step': t => { const k = t.dataset.k, cur = state.bl.horaires[k]; setTime(k, cur ? fromMin(roundQ(toMin(cur)) + +t.dataset.d) : DEFAULT_T[k], true); },
-  preset: () => { const h = state.bl.horaires; if (state.bl.facturation.continu) Object.assign(h, { matinArr: '07:30', matinDep: '15:30' }); else Object.assign(h, DEFAULT_T); clearErrors(); changed({ rerender: true }); },
-  'apply-prevu': () => {
-    const p = state.bl.source.prevu, h = state.bl.horaires;
+  't-open': t => { const i = +t.dataset.i; openTimeSheet(`engins.${i}.horaires.${t.dataset.k}`, v => setTime(i, t.dataset.k, v)); },
+  't-step': t => { const i = +t.dataset.i, k = t.dataset.k, cur = state.bl.engins[i].horaires[k]; setTime(i, k, cur ? fromMin(roundQ(toMin(cur)) + +t.dataset.d) : DEFAULT_T[k], true); },
+  preset: t => { const e = state.bl.engins[+t.dataset.i]; if (e.facturation.continu) Object.assign(e.horaires, { matinArr: '07:30', matinDep: '15:30' }); else Object.assign(e.horaires, DEFAULT_T); clearErrors(); changed({ rerender: true }); },
+  'copy-heures': t => { const e = state.bl.engins[+t.dataset.i]; Object.assign(e.horaires, state.bl.engins[0].horaires); e.facturation.continu = state.bl.engins[0].facturation.continu; clearErrors(); changed({ rerender: true }); },
+  'apply-prevu': t => {
+    const p = state.bl.source.prevu, e = state.bl.engins[+t.dataset.i], h = e.horaires;
     const a = fromMin(roundQ(toMin(p.debut))), b = fromMin(roundQ(toMin(p.fin)));
-    if (!state.bl.facturation.continu && dur(a, b) >= 6 * 60) Object.assign(h, { matinArr: a, matinDep: '12:00', amArr: '13:00', amDep: b });
+    if (!e.facturation.continu && dur(a, b) >= 6 * 60) Object.assign(h, { matinArr: a, matinDep: '12:00', amArr: '13:00', amDep: b });
     else Object.assign(h, { matinArr: a, matinDep: b, amArr: '', amDep: '' });
     clearErrors(); changed({ rerender: true });
   },
